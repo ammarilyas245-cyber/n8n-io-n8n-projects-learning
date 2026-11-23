@@ -1,0 +1,708 @@
+{
+  "name": "Ultimate Social Media Posting Agent (Instagram, Facebook, LinkedIn)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Social Media Post Post Generator",
+        "formDescription": "Fill out these fields and you'll have a full Social Media Post ready to go in minute.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Topic of Post",
+              "placeholder": "Robots",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Audience",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -880,
+        -240
+      ],
+      "id": "a902b371-3113-462a-ac41-d42b9b99159f",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topic for Post : {{ $json['Topic of Post'] }}\nTarget Audience : {{ $json['Target Audience'] }}",
+        "options": {
+          "systemMessage": "=# Overview \nYou are an AI Agent specialized in creat ing professional, educational and engaging social media post based on any topic provided by the user. Always use the current date : {{ $now.format('dd-MM-yyyy')  }}.\n\n## Objective:\nAlways begin by conducting a real time search using the Tavily tool to gather the most accurate, up-to-date information on the topic. The post should be written to appeal to the provided target audience.\n\nBased on your research,  generate a well structured social media post that:\n- Start with an engaging hook\n- Professional In tone\n- Clear and easy to read\n- Educational and insightful\n- Light on emojies (use only when highly relevent and minimal)\n- Include proper source attributes ( e.g ,\"according to [source]\" )\n- Contains relevent hastags to improve visibility\n- Ends with a clear call to action (e.g , asking for a thoughts, feedback, or shares)\n\n## Output Instructions:\n- You only output should be the final social media post text.\n- Do not include explanation, notes, or anything beyond the post itself.\n\n## Example Workflow\n1) Recieve a topic (e.g ,\"The ROI of warehouse Automation\")\n2) Use Tavily to search and gather recent information on case studies.\n3) Draft a social media post using that research.\n4) Format it with source citations, clear instructions, optional hashtags, and a call to action."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -464,
+        -240
+      ],
+      "id": "a65b7643-2b5e-4c48-853e-60a158830682",
+      "name": "Social Media Post Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        -16
+      ],
+      "id": "6e65599d-1e33-439e-bc57-50af3a6b2eb6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -32
+      ],
+      "id": "2472a5e2-d3ef-4c62-ac12-a33bc86b141c",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Social Media Post:  {{ $json.output }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are an AI agent that transforms social media post into visual prompt descriptions for generating graphic marketing materials. These visuals are designed to be paired with the post on social accounts, helping communicate the message in a visually engaging brand aligned way.\n\n## Objective\n- Read and analyze the given social media post.\n- Identify the main message, insight, or take away from the post. \n- Create a clear and compelling graphic prompt that can be used with a text to image generator.\n- The result should be marketing style, graphic, or hyper realistic photo that:\n1) This support Illustrates the key idea of the post \n2) Looks appropriate for use in a professional feed\n3) Feels polished, modern , and engaging\n\n## Output Instrutions\n- Output only the final image prompt.\n- Do not output quotation marks.\n- Do not repeat or rephrase the post.\n- Do not add any explanation or extra content, just the image prompt.\n- Never leave things blank like header area, reserve for customizable call out text.\n- Output numeric starts when available in the original post.\n\n## Style Guidelines \n- Think like a brand designer or marketing creative. \n- Visuals may include text, chart, icons, abstract shapes, overlays, modern illustrations, motion like effects, bold typography elements, (described, not rendered) or metaphorical concepts.\n- You can mention layout suggestions, (example, split screen design, header with bold titles, and and subtle background illustrations).\n- Assume the output will be generated using AI image tools - Your prompt should guide those tools effectively. \n\n## Example Prompt Format:\nA modern flat style graphic showing a human brain connected to mechanical gears representing the fusion of AI and automation. Minimalistic background, soft gradient, clear sans-serif text, placement space at the top."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        32,
+        -240
+      ],
+      "id": "5e55e74f-58ce-4ef5-9ab8-e36f85713437",
+      "name": "Image Prompt Agent"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-image-1-mini"
+        },
+        "prompt": "={{ $json.output }}",
+        "options": {
+          "quality": "medium",
+          "size": "1024x1024"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        -240
+      ],
+      "id": "4b89c7b6-e717-4f7d-a818-ac0f212b377f",
+      "name": "Generate an image",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "YOUR_LINKEDIN_PERSON_ID",
+        "text": "={{ $('Social Media Post Agent').item.json.output }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        -960
+      ],
+      "id": "3ca7ed4a-558f-466c-a51c-ce04b64bc8f9",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "name": "LinkedIn OAuth Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 1. On form submission (Trigger)\n This is the starting point. A simple web form asks the user for two things: the Topic they want to post about, and the Target Audience they're writing for.\nTechnical: formTrigger node (v2.6) with two required fields (Topic of Post, Target Audience). Generates a webhook-based form URL.",
+        "height": 464,
+        "width": 352,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        -576
+      ],
+      "id": "d880bc55-f16d-4c0f-8ae0-085d971edc09",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Workflow Documentation: Ultimate Social Media Posting Agent\n## Overview \n\nThis workflow is a fully automated social media content generator. A user fills out a short form with a topic and target audience, and the system does everything else: it researches the topic online, writes a professional post, designs a matching AI-generated image, and publishes the finished post — with the image attached — to LinkedIn, Facebook, and Instagram at the same time.\n\n This is an n8n workflow combining a LangChain-based multi-agent AI pipeline (research + copywriting + image-prompt generation), OpenAI image generation, Google Drive as an image-hosting intermediary, and three separate social platform integrations (LinkedIn native node, Facebook Graph API via HTTP node, and Instagram via a community node).",
+        "height": 560,
+        "width": 848,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3040,
+        -688
+      ],
+      "id": "cd2ecd6b-3ef6-4cf1-88ea-c7d8a64d383e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "name": "data",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1728,
+        192
+      ],
+      "id": "3f52c8fe-4be3-447f-ab28-389d3b32c09a",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1984,
+        192
+      ],
+      "id": "8130dae8-2fc0-477c-b1d3-3f77a5265ab6",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  const fileId = $('Upload file').item.json.id;\n  item.json.imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        192
+      ],
+      "id": "a78b8d25-1fba-4a6f-afad-1067192abe6e",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "node": "YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID",
+        "imageUrl": "={{ $json.imageUrl }}",
+        "caption": "={{ $('Social Media Post Agent').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "@mookielianhd/n8n-nodes-instagram.instagram",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        192
+      ],
+      "id": "89f1d661-2b51-4731-8c7e-b54644acd18f",
+      "name": "Post on Instagram",
+      "credentials": {
+        "instagramApi": {
+          "name": "Instagram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v25.0",
+        "node": "me",
+        "edge": "photos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "file:data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "caption",
+                "value": "={{ $('Social Media Post Agent').item.json.output }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        -464
+      ],
+      "id": "caf78ea5-2296-4385-96bc-2adbe8c75953",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 2. Social Media Post Agent (AI Agent)\n\nPlain language: This is the \"writer.\" It takes the topic and audience, researches the subject live on the web, and writes a polished, ready-to-publish social media post — complete with a hook, insights, sources, hashtags, and a call to action.\nTechnical: LangChain Agent node (v3.1) using a define-type prompt. Pulls in the OpenAI Chat Model (GPT-4o) as its LLM and the Tavily tool for live web search. System prompt enforces tone, structure, and a strict \"post text only\" output format.",
+        "height": 464,
+        "width": 496,
+        "color": "#05042F"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -576
+      ],
+      "id": "f598e65d-fb2e-48cb-9c94-f9de3941fdba",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "\n# 3. OpenAI Chat Model\n\nThe AI \"brain\" that powers the writing \nand image-prompt agents.\nTechnical: gpt-4o model node,\n shared as the language model for both the \nSocial Media Post Agent and the Image Prompt Agent \n(two connections from one model node).",
+        "height": 224,
+        "width": 560,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -48
+      ],
+      "id": "8a95da73-3b19-401e-91fe-f7c460b3afbb",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# 4. Search in Tavily\n\n A research tool the writer AI uses to pull \ncurrent, real facts from the \nweb instead of guessing.\nTechnical: Tavily search tool node, \nconnected as an ai_tool to the Social Media Post Agent. Query is dynamically generated by the agent itself ($fromAI).",
+        "height": 224,
+        "width": 560,
+        "color": "#000000"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -48
+      ],
+      "id": "a03d9a5a-06c8-4038-b3ee-1d254becf165",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# 5. Image Prompt Agent (AI Agent)\n\nPlain language: This is the \"art director.\" It reads the finished post and translates its core message into a detailed, professional description that an AI image generator can turn into a graphic.\nTechnical: Second LangChain Agent node, takes Social Media Post Agent's output as input text. System prompt enforces marketing-style visual language (layout, color, style) and restricts output to prompt text only — no explanations.",
+        "height": 448,
+        "width": 496,
+        "color": "#05042F"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -560
+      ],
+      "id": "bcb21caf-4426-482f-92de-e83ead7eefee",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# 6. Generate an image\n\nPlain language: This is where the actual graphic gets created, using the description from the previous step.\nTechnical: OpenAI node, resource: image, model gpt-image-1-mini, quality medium, size 1024x1024. Outputs a binary PNG file (field name: data).",
+        "height": 416,
+        "width": 352,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -512
+      ],
+      "id": "23fdaa40-ad76-4acf-9de0-cd3fbc09671f",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# 7. Code in JavaScript\n\nPlain language: A behind-the-scenes step that packages the image so it can be reused by the next steps.\nTechnical: Extracts the binary image and builds a base64 data URI (imageUrl) plus metadata (fileName, mimeType, fileSizeBytes). Note: this base64 output isn't actually usable for Instagram/Facebook (they require public HTTPS URLs, not data URIs) — its real value here is just passing the binary file forward unchanged to the three branches below. This is a flagged cleanup item (see Recommendations).\n\n### This node branches into three parallel paths:",
+        "height": 512,
+        "width": 544,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -608
+      ],
+      "id": "512c9f3a-7a47-451f-b727-9e9abbdf6935",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Run Once for All Items\nfor (const item of $input.all()) {\n  const binaryKey = 'data'; // must match the binary property name from \"Generate an image\"\n  const binary = item.binary?.[binaryKey];\n\n  if (!binary) {\n    throw new Error(`No binary data found on key \"${binaryKey}\". Check the binary property name from the previous node.`);\n  }\n\n  const mimeType = binary.mimeType || 'image/png';\n\n  // Build a base64 data URL from the binary\n  item.json.imageUrl = `data:${mimeType};base64,${binary.data}`;\n  item.json.fileName = binary.fileName || 'generated-image.png';\n  item.json.mimeType = mimeType;\n  item.json.fileSizeBytes = binary.fileSize || null;\n\n  // item.binary stays untouched — the binary file still flows through this node\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -240
+      ],
+      "id": "d8128b39-d3af-4c7a-9efe-c3bd35772783",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "# 8a. Create a post (LinkedIn)\n\nPlain language: Publishes the post text and image directly to your LinkedIn page.\nTechnical: Native n8n-nodes-base.linkedIn node. person field holds the LinkedIn author URN, text pulls the caption from the Social Media Post Agent, shareMediaCategory: IMAGE, visibility set to PUBLIC.",
+        "height": 464,
+        "width": 368,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        -1280
+      ],
+      "id": "6c8db191-eb3c-48fd-a032-5491c669258b",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# 8c. Facebook Graph API\n\nPlain language: Posts the same image and caption to your Facebook Page.\nTechnical: HTTP-based Facebook Graph API node, POST to {node}/photos with binary file upload (sendBinaryData: true), caption passed as a query parameter.",
+        "height": 416,
+        "width": 352,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        -752
+      ],
+      "id": "e5881425-0452-413a-a31d-a8b2273ea458",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# Upload file (Google Drive): \nuploads binary to Drive root as file data",
+        "height": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        16
+      ],
+      "id": "3679113e-d135-4e29-a41e-e63f6f909026",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "# Share file (Google Drive): \nsets permission type: anyone, role: reader — makes the",
+        "height": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        16
+      ],
+      "id": "7ca39ba5-57ad-49e1-ba13-616e41011da4",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# 8b. Upload file → Share file → Code in JavaScript1 → Post on Instagram\n\nPlain language: Since Instagram can't accept the image file directly, this path first uploads the image to Google Drive, makes it publicly viewable, builds a direct link to it, and then hands that link to Instagram for publishing along with the caption.",
+        "height": 208,
+        "width": 1248
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -240
+      ],
+      "id": "5c916d67-9896-4ee5-8b51-82ca6a4dae92",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "# Code in JavaScript1: builds the direct-view URL: \nhttps://drive.google.com/uc?export=view&id={fileId}",
+        "height": 320,
+        "width": 288,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        16
+      ],
+      "id": "c7dc79ac-a8a1-427c-9c6c-99a10b7e0c3f",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "# Post on Instagram: \nCommunity node (@mookielianhd/n8n-nodes-instagram), targets Instagram Business Account ID YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID, uses the constructed imageUrl and the caption from the Social Media Post Agent",
+        "height": 368,
+        "width": 416,
+        "color": "#280236"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        -16
+      ],
+      "id": "ef591c1b-da81-4297-8b3c-5756d289bdca",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "# Setup Guide\n## Step\tWhat to do\n1\tConnect OpenAI account credential (used for both text generation and image generation)\n2\tConnect Tavily account credential (for live web research)\n3\tConnect LinkedIn OAuth2 credential and set the correct person URN for the posting account/page\n4\tConnect Google Drive credential and confirm the target upload folder\n5\tConnect Instagram credential (community node) and confirm the Instagram Business Account ID is correct\n6\tConnect Facebook Graph API credential using a Page Access Token (not a personal/user token)\n7\tUpdate the Facebook Graph API node's node field from me to the actual Facebook Page ID\n8\tTest each branch (LinkedIn, Instagram, Facebook) individually before running the full workflow end-to-end\n9\tActivate the workflow once all three publishing branches succeed in testing",
+        "height": 512,
+        "width": 832
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2144,
+        -656
+      ],
+      "id": "75218a73-c6b7-4fb7-ad84-09e183ad39d7",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "# Credentials Required\n## 1. OpenAI\nCredential : OpenAI account\t\nUsed By\t: OpenAI Chat Model, Generate an image\nPurpose : Powers text generation (GPT-4o) and image generation (gpt-image-1-mini)\n\n## 2. Tavily\nCredential : Tavily account\t\nUsed By\t: Search in Tavily\t\t\nPurpose : Live web search for research\n\n## 3. LinkedIn\nCredential : LinkedIn OAuth2 API\t\nUsed By : Create a post\t\nPurpose : Publishing to LinkedIn\n\n## 4. Google Drive\nCredential : Google Drive OAuth2 API\t\nUsed By\t: Upload file, Share file\t\nPurpose : Temporary public image hosting\n\n## 5.  Instagram\nCredential : Instagram API\t\t\nUsed By\t: Post on Instagram\t\nPurpose : Publishing to Instagram\n\n## 6. Facebook\nCredential : Facebook Graph API\t\t\nUsed By\t: Facebook Graph API\t\nPurpose : Publishing to Facebook Page",
+        "height": 1024,
+        "width": 832
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2144,
+        -128
+      ],
+      "id": "327f9eb9-c75f-43db-9337-678c1d94e673",
+      "name": "Sticky Note16"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Social Media Post Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Social Media Post Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Image Prompt Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Social Media Post Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Media Post Agent": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Post on Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
