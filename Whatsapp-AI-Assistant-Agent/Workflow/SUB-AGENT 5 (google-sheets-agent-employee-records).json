@@ -1,0 +1,429 @@
+{
+  "name": "Child workflow Google Sheets Agent (Employee records)",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.EMPLOYEE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $env.EMPLOYEE_SHEET_TAB }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Contact": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Department": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Department', ``, 'string') }}",
+            "Age": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Age', ``, 'string') }}",
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Emplyee ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Emplyee_ID', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Emplyee ID",
+              "displayName": "Emplyee ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Age",
+              "displayName": "Age",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        160,
+        400
+      ],
+      "id": "69e04bee-8708-4b33-8dce-8a202730e5aa",
+      "name": "Append row in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "L6C8R5Qw4EnnwxOI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.EMPLOYEE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $env.EMPLOYEE_SHEET_TAB }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        368
+      ],
+      "id": "9fed75d3-f4f0-4e97-8113-7b3fa1250998",
+      "name": "Get row(s) in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "L6C8R5Qw4EnnwxOI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.EMPLOYEE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $env.EMPLOYEE_SHEET_TAB }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Emplyee ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Emplyee_ID__using_to_match_', ``, 'string') }}",
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Age": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Age', ``, 'string') }}",
+            "Department": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Department', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Contact": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Emplyee ID"
+          ],
+          "schema": [
+            {
+              "id": "Emplyee ID",
+              "displayName": "Emplyee ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Age",
+              "displayName": "Age",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        336
+      ],
+      "id": "59107f41-ec55-4931-b2a0-6405b48e88df",
+      "name": "Update row in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "L6C8R5Qw4EnnwxOI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.EMPLOYEE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $env.EMPLOYEE_SHEET_TAB }}"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}",
+        "numberToDelete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Number_of_Rows_to_Delete', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        272
+      ],
+      "id": "4a874801-4104-4ae2-a4ef-d6ca64dd9d07",
+      "name": "Delete rows or columns from sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "L6C8R5Qw4EnnwxOI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        176
+      ],
+      "id": "4f9c47d1-7e70-4e98-8d83-20255f5c8e62",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "VsF7rfdIPdPPdoWv",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "# ROLE & OBJECTIVE\nYou are the Google Sheets Management Agent, responsible for managing the company's Employee Records sheet. You are called by the WhatsApp AI Assistant whenever the user wants to look up, add, update, or remove employee information. You handle the entire task using your connected tools and return a clear, human-readable result.\n\n# TOOL USAGE GUIDELINES\nYou have access to four tools:\n\n1. **Get row(s) in sheet** — Use when the user wants to look up, check, or retrieve employee information — for example finding someone's contact details, department, role, joining date, or any other stored field. Search using the name or identifying detail provided by the user.\n\n2. **Append row in sheet** — Use when the user wants to add a new employee record. Only proceed if you have enough information to fill the required fields (e.g. name, department, contact info). If key details are missing, ask the user for them rather than leaving fields blank or guessing.\n\n3. **Update row in sheet** — Use when the user wants to change or correct existing employee information — for example updating a phone number, department, or role. First use \"Get"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        144,
+        16
+      ],
+      "id": "a5ccc276-35e4-44a9-b5b8-d51c2b08d7b5",
+      "name": "Google Sheets Management AI Agent1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "f03291e2-1df9-48e0-8e71-84fb7254c54a",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -64,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Google Sheets Agent — Employee Records (sub-workflow)\n## Start (passthrough trigger)\n\nReceives { query } — a natural-language employee-record request from the parent.\n\n## Google Sheets Management AI Agent1\n\nSystem prompt routes intent → one of 4 tools below; instructed to ask for missing required fields rather than guess before an Append.\n\n## Get row(s) in sheet in Google Sheets1\n\nNo filters defined (filtersUI: { values: [] }) — returns all rows; the agent itself filters/searches within the result set.\n\n## Append row in sheet in Google Sheets1\n\nWrites a new row: Emplyee ID (sic — sheet header literally has this typo), Name, Age, Department, Email, Contact — all values resolved via $fromAI.\n\n## Update row in sheet in Google Sheets1\n\nMatches on Emplyee ID column (matchingColumns: [\"Emplyee ID\"]) to find which row to overwrite.\n\n## Delete rows or columns from sheet in Google Sheets1\n\nDeletes by startIndex + numberToDelete, both $fromAI-resolved numbers — riskier than ID-based deletion since it's positional.\n\n## Groq Chat Model3\n\nLLM backing the agent — llama-3.3-70b-versatile.\n",
+        "height": 1024,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -16
+      ],
+      "id": "181617c4-c3f5-45d2-abad-cac2924f1a4d",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets Management AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "8ad47b78-e692-4a1e-81a6-b09ced1269a0",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "iu70KaKcAweqjp9V",
+  "tags": []
+}

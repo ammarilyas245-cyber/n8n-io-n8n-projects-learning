@@ -1,0 +1,201 @@
+{
+  "name": "Child-workflow Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query__q_', ``, 'string') }}",
+        "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location__location_', ``, 'string') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        672,
+        272
+      ],
+      "id": "2d7862fa-f077-4f1c-977a-740e75dff84d",
+      "name": "Google search in SerpApi",
+      "credentials": {
+        "serpApi": {
+          "id": "gznMcDWbfT5yOacz",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "15a08f6a-08c5-4515-af39-e5fcf598fe2f",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        272
+      ],
+      "id": "bc3b6f01-db0b-4137-8fce-d43220f707e7",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "zLseJHo3ih75Y8p3",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        336,
+        272
+      ],
+      "id": "935eda05-26a7-4ea3-af30-7496bf0bdb5f",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "# ROLE & OBJECTIVE\nYou are a Research Agent, a specialized sub-workflow responsible for answering research queries by gathering accurate, current, and well-sourced information. You are called by a parent WhatsApp AI Assistant whenever it needs real-time or in-depth information it cannot answer from its own knowledge. Your job is to research the query thoroughly using your tools and return a clean, ready-to-use answer — the parent agent will relay your output directly to the end user.\n\n# TOOL USAGE GUIDELINES\nYou have access to three research tools. Choose the right one based on the nature of the query:\n\n1. **Wikipedia** — Use for general knowledge, historical facts, definitions, biographical background, or established encyclopedic information that does not change day to day (e.g., \"Who was the first president of Pakistan,\" \"What is photosynthesis\").\n\n2. **Search in Tavily** — Use for queries that require broader web research, comparisons, summarized findings from multiple sources, or when you need a well-rounded synthesis of a topic (e.g., \"compare the top 3 CRMs for small businesses,\" \"latest research on intermittent fasting\").\n\n3. **Google Search in SerpApi** — Use for real-time, fast-changing, or highly current information: breaking news, today's events, live prices, sports scores, recent product releases, or anything time-sensitive where freshness matters most (e.g., \"who won the match today,\" \"current price of gold,\" \"latest news on X\").\n\nIf a query could reasonably use more than one tool, use them in combination and synthesize the results rather than relying on just one. If Wikipedia doesn't have sufficient depth or currency, follow up with Tavily or SerpApi as needed.\n\n# RESEARCH PROCESS\n- Always verify information across at least one tool before answering factual or time-sensitive queries.\n- If tool results conflict, prioritize the most recent and most authoritative source, and briefly note the discrepancy if relevant.\n- Do not fabricate information. If your tools return no relevant results, say so honestly rather than guessing.\n\n# OUTPUT FORMAT\n- Write in clear, natural, conversational language — this will be relayed directly to a WhatsApp user, so keep it concise and easy to read on a phone screen.\n- Use short paragraphs or bullet points for multi-part answers; avoid long unbroken blocks of text.\n- Do not mention which tool you used, your internal process, or phrases like \"According to my search\" or \"Based on the Tavily results\" — just present the information directly as a confident, clean answer.\n- Do not include raw URLs, citation markers, or source dumps unless the user specifically asks for sources or links.\n- Keep responses focused and relevant — do not pad with unnecessary caveats or disclaimers unless genuinely important (e.g., for"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        0
+      ],
+      "id": "47bc78c1-3000-4bf5-bc6f-f56147df9ffe",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.1",
+          "mode": "list",
+          "cachedResultName": "gpt-5.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        240
+      ],
+      "id": "b6ba88ca-9764-4006-b3d9-f274075d3f91",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "b1uuahNwy3IlC85U",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Research Agent (sub-workflow)\n## Start (Execute Workflow Trigger, passthrough)\n\nReceives { query } from the parent's Research agent tool-workflow call.\n\n## Research Agent (LangChain agent)\n\nPrompt = {{ $json.query }} directly, no pre-processing.\nSystem prompt routes between three tools based on query type (see below) and instructs: verify facts across ≥1 tool, no fabrication, no \"according to my search\" phrasing, conversational WhatsApp-friendly output.\n\n## Wikipedia (tool)\n\nNo credentials needed — public API.\nUsed for static/encyclopedic facts (history, definitions, biography).\n\n## Search in Tavily (tool)\n\nQuery resolved via $fromAI('Query') — the agent decides the search string.\nUsed for synthesis-style queries (comparisons, \"latest research on X\").\n\n## Google search in SerpApi (tool)\n\nTwo $fromAI params: q (search query) and location.\nUs ed for time-sensitive/real-time info (breaking news, live prices, scores).\n\n## OpenAI Chat Model\n\nPowers the agent's reasoning — model gpt 5.1\n",
+        "height": 928,
+        "width": 752,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -80
+      ],
+      "id": "160440aa-ae7c-4263-aea0-2c6600d30dfc",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google search in SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b0271dec-1089-4923-9362-f54e46c850ea",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "6pvkASm4hnBM9vMU",
+  "tags": []
+}
