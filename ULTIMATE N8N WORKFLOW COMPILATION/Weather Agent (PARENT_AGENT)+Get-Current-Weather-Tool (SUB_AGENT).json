@@ -1,0 +1,196 @@
+{
+  "name": "Weather Agent (PARENT_AGENT)+Get-Current-Weather-Tool (SUB_AGENT)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9f19a330-2faf-40d2-b96d-b1e0ad46ca5e",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "weather-agent-webhook"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful weather and general knowledge assistant.\n\n## Your Capabilities\n- You can retrieve current weather for any city using the Get-Current-Weather-Tool\n- You can look up general information using Wikipedia\n\n## Instructions\n- When the user asks about weather, ALWAYS use the Get-Current-Weather-Tool\n- Extract the EXACT city name from the user message and pass it to the tool\n- Do NOT default to any city — always use the city the user mentioned\n- When the user asks general questions, use Wikipedia\n- Present weather results in a clean, friendly format with emojis\n- Be concise and helpful"
+        }
+      },
+      "id": "54bde323-4890-457f-ae46-e03ad5813bd3",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        352,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": ""
+        },
+        "options": {}
+      },
+      "id": "d2d68ab4-16e3-44b6-acab-c988cc7a3779",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "1880f776-83ec-4100-87b0-7b7a4fa107ad",
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        480,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Get_Current_Weather_Tool",
+        "description": "Call this tool whenever the user asks about weather for any city. Extract the EXACT city name from the user's message and pass it as the city parameter. Do not default to any city.",
+        "workflowId": {
+          "__rl": true,
+          "value": "Y2tq26yXT5g8riJ5",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Y2tq26yXT5g8riJ5",
+          "cachedResultName": "Get-Current-Weather-Tool Claude"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "city": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('city', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "city"
+          ],
+          "schema": [
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f825f5ea-b907-4724-a5a9-422e72d0b631",
+      "name": "Call 'Get-Current-Weather-Tool Claude'",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        608,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "e282caa6-cbea-4d42-a991-c008603061aa",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Get-Current-Weather-Tool Claude'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "18f6538d-0f23-49f0-9fa5-7676867a74b2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "x6x3nFPnZgMmJxDS",
+  "tags": []
+}

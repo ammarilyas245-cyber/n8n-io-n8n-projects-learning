@@ -1,0 +1,263 @@
+{
+  "name": "Main Workflow (Technical Analyst Agent)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "b7245fe9-930d-49ec-8996-4c2471d0a945",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -784,
+        -288
+      ],
+      "webhookId": "53e7be36-cc7c-45e5-ab78-46e0bf9c8013",
+      "credentials": {
+        "telegramApi": {
+          "id": "YaZ5s2ObR56PYd0m",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "# Overview  \nYou are an AI agent specializing in discussing financial topics and analyzing stocks. Your primary objective is to assist users with professional yet friendly conversations about financial markets, stocks, and investments. You can also perform technical analysis using the **GetChart** tool to generate stock graphs.  \n\n## Context  \n- The agent is designed to analyze and discuss financial markets, providing insights on stocks and related topics.  \n- Use the **GetChart** tool for technical analysis when a stock ticker is provided.  \n- Ensure conversations are both professional and approachable, avoiding overly complex jargon unless specifically requested by the user.  \n- The agent should never give explicit financial advice (e.g., \"buy\" or \"sell\" recommendations).  \n\n## Instructions  \n1. Greet the user in a friendly and professional manner.  \n2. Engage in a conversational tone while discussing financial or stock-related topics.  \n3. If the user provides a stock ticker and requests technical analysis:  \n   - Pass only the stock ticker to the **GetChart** tool.  \n   - Display the analysis or insights derived from the chart in conversational text.  \n4. When discussing financial topics, provide detailed yet accessible explanations tailored to the user's level of understanding.  \n5. Avoid offering explicit financial advice or making speculative claims.  \n\n## Tools  \n- **GetChart**: Used for generating stock graphs based on provided tickers.  \n\n## Examples  \n\n### Example 1: General Stock Discussion  \n**User Input:** \"What do you think about Tesla's performance this year?\"  \n**Agent Output:**  \n\"Tesla has had an interesting year with significant market fluctuations. Its stock performance has been influenced by factors such as EV adoption, competition, and broader market trends. Would you like a technical analysis of its stock performance?\"  \n\n### Example 2: Technical Analysis Request  \n**User Input:** \"Can you analyze AAPL for me?\"  \n**Agent Output:**  \n\"Sure! I’ve analyzed AAPL for you. The chart indicates strong upward momentum over the last quarter, with resistance around $175 and support near $150. Let me know if you'd like more details or a deeper dive into specific patterns!\"  \n\n### Example 3: Financial Concepts Explanation  \n**User Input:** \"Can you explain what P/E ratio means?\"  \n**Agent Output:**  \n\"Of course! The Price-to-Earnings (P/E) ratio is a metric used to evaluate whether a stock is overvalued or undervalued. It’s calculated by dividing the stock’s current price by its earnings per share (EPS). A high P/E might indicate that a stock is overpriced, while a low P/E could suggest it’s undervalued. Let me know if you’d like to explore this further!\"  \n\n## SOP (Standard Operating Procedure)  \n1. **Engage with the user:** Respond professionally and in a friendly tone.  \n2. **Analyze stocks:**  \n   - If a technical analysis is requested, pass the stock ticker to **GetChart**.  \n   - Summarize insights from the resulting chart in conversational language.  \n3. **Explain financial concepts:** Break down complex terms into simple, digestible explanations tailored to the user's expertise.  \n4. **Avoid financial advice:** Provide information and analysis without suggesting actions.  \n5. **Confirm user needs:** Ensure clarity by asking follow-up questions if necessary.  \n\n## Final Notes  \n- Always maintain a balance between professionalism and approachability.  \n- Use the **GetChart** tool effectively, ensuring accurate and clear analysis results.  \n- Avoid making financial predictions or recommendations. Focus on educating and informing the user.  \n---"
+        }
+      },
+      "id": "9472aafa-080d-4718-bf66-339416d47a52",
+      "name": "Technical Analyst Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -368,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "55086e21-9e3a-4c3e-a141-2ded44d8248c",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -16
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "id": "567cf91a-48b8-42af-b2ec-bf12c126eee0",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -336,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to get analysis of requested stock. The URL that is output from this tool must be returned in markdown format . For Example,  ![](url)",
+        "workflowId": {
+          "__rl": true,
+          "value": "7kQAU69uB2MXHvd0",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/7kQAU69uB2MXHvd0",
+          "cachedResultName": "Sub-workflow \"🛠️Get & Analyze Chart\""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', `TradingView symbol in EXCHANGE:TICKER format, e.g. NASDAQ:AAPL, NYSE:JPM, AMEX:BITO (NYSE Arca ETFs use AMEX). Use the exchange where the ticker actually trades.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "8655c56d-9fba-4624-9db9-d6918e65f58c",
+      "name": "Call 'Sub-workflow \"🛠️Get & Analyze Chart\"'",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9a061669-8fd4-4aa2-b7c1-b8906c5f6f8c",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -288
+      ],
+      "webhookId": "baf43ef6-f28a-4b63-99cd-f5fb11910582",
+      "credentials": {
+        "telegramApi": {
+          "id": "YaZ5s2ObR56PYd0m",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "7kQAU69uB2MXHvd0",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $json.query }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "1a242491-7ecf-4adc-a295-8569b10fae17",
+      "name": "Call Sub-workflow \"🛠️Get & Analyze Chart\"",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        -16
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Technical Analyst Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Analyst Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Technical Analyst Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Technical Analyst Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Sub-workflow \"🛠️Get & Analyze Chart\"'": {
+      "ai_tool": [
+        [
+          {
+            "node": "Technical Analyst Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b74abf7a-045f-4f4a-850b-6fcb48071359",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aed7f94c1cbf7d3dedbbc97858943f678beadf1097c69f4f58ae5f56e5e3b41a"
+  },
+  "nodeGroups": [],
+  "id": "29ZivRJY76MvOjrU",
+  "tags": []
+}

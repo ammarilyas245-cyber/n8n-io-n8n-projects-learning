@@ -1,0 +1,636 @@
+{
+  "name": "Twitter/X Scraper",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        48
+      ],
+      "id": "9536eee0-e2a7-43b9-bc1a-9151c7ccdebb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -928,
+        -80
+      ],
+      "id": "9c3be727-1775-4271-a415-677fc128ae22",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "# Scraping Twitter",
+        "height": 400,
+        "width": 1604,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -976,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "cbbabda8-f942-4957-9dda-3de347bec91c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ArcFthjAC4A6KJi84RqJ_2lHTuMX5vqmNada84Wq_-w",
+          "mode": "list",
+          "cachedResultName": "Twitter / (X.com) Date",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ArcFthjAC4A6KJi84RqJ_2lHTuMX5vqmNada84Wq_-w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ArcFthjAC4A6KJi84RqJ_2lHTuMX5vqmNada84Wq_-w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Tweet ID": "={{ $json.id }}",
+            "URL": "={{ $json.url }}",
+            "Tweet Text/Content": "={{ $json.text }}",
+            "Likes": "={{ $json.likeCount }}",
+            "Retweets": "={{ $json.retweetCount }}",
+            "Replies": "={{ $json.replyCount }}",
+            "Quotes": "={{ $json.quoteCount }}",
+            "Views": "={{ $json.viewCount }}",
+            "Dates": "={{ $json.createdAt }}"
+          },
+          "matchingColumns": [
+            "Tweet ID"
+          ],
+          "schema": [
+            {
+              "id": "Tweet ID",
+              "displayName": "Tweet ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tweet Text/Content",
+              "displayName": "Tweet Text/Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Likes",
+              "displayName": "Likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Retweets",
+              "displayName": "Retweets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Replies",
+              "displayName": "Replies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quotes",
+              "displayName": "Quotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Views",
+              "displayName": "Views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dates",
+              "displayName": "Dates",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        -48
+      ],
+      "id": "082c1545-d7bd-4548-9f84-6d61b7f7f188",
+      "name": "Adding data into the sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ItMaHWQXqzZzXBYI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the response from the HTTP Request node\nconst response = $input.first().json;\n\n// The twitterapi.io response contains a 'tweets' array\nconst tweets = response.tweets || [];\n\n// Map each tweet into a separate n8n item with your required fields\nconst items = tweets.map(tweet => {\n  return {\n    json: {\n      id:           tweet.id || tweet.tweet_id || \"\",\n      url:          tweet.url || `https://twitter.com/i/web/status/${tweet.id}`,\n      text:         tweet.text || tweet.full_text || \"\",\n      retweetCount: tweet.retweetCount ?? tweet.retweet_count ?? 0,\n      replyCount:   tweet.replyCount   ?? tweet.reply_count   ?? 0,\n      likeCount:    tweet.likeCount    ?? tweet.like_count    ?? tweet.favorite_count ?? 0,\n      quoteCount:   tweet.quoteCount   ?? tweet.quote_count   ?? 0,\n      viewCount:    tweet.viewCount    ?? tweet.view_count    ?? tweet.views ?? 0,\n      createdAt:    tweet.createdAt    ?? tweet.created_at    ?? \"\",\n    }\n  };\n});\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -48
+      ],
+      "id": "6c8461ac-aa37-4675-a798-d3c2fb2710e9",
+      "name": "Extracting Information"
+    },
+    {
+      "parameters": {
+        "url": "https://api.twitterapi.io/twitter/tweet/advanced_search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "queryType",
+              "value": "Top"
+            },
+            {
+              "name": "query",
+              "value": "Openai"
+            },
+            {
+              "name": "cursor",
+              "value": "={{ $json.cursor }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        -48
+      ],
+      "id": "0ea1f472-f437-4828-b5d6-b8e8621dbadc",
+      "name": "Getting Tweets",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "c7MUdCgzGAZ0ft6H",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f988cc1d-79da-4ffa-b103-f092a8f8b397",
+              "name": "count",
+              "value": 1,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -688,
+        -48
+      ],
+      "id": "b40e0939-978c-46d2-ae80-da10665eb10c",
+      "name": "Set Count"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "16135468-ec75-4e12-baf9-99a4e846fee5",
+              "name": "count",
+              "value": "={{ $json.count }}",
+              "type": "number"
+            },
+            {
+              "id": "6c596c85-f330-4681-8420-ef282537d8b9",
+              "name": "cursor",
+              "value": "={{ $json.cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        -48
+      ],
+      "id": "4f742c4d-e6ef-4e53-bdf1-555fcee936bc",
+      "name": "Counter"
+    },
+    {
+      "parameters": {
+        "content": "# Checking Count",
+        "height": 400,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "cd3061e0-fd3b-49e7-9658-2b7bdb7a9c93",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fd5d3893-8c23-4e81-a3cc-e81521c13ef2",
+              "leftValue": "={{ $('Counter').item.json.count }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        -48
+      ],
+      "id": "ccd6bfff-d3d5-44dc-bcc9-b1e014d6e65c",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -64
+      ],
+      "id": "b15f72cd-c0a1-4828-b2a7-626ca6e309be",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "content": "# Increasing Count and Cursor",
+        "height": 368,
+        "width": 1316,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        272
+      ],
+      "typeVersion": 1,
+      "id": "affa260e-c8fb-4f75-8c55-b696e361a0f2",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        64,
+        416
+      ],
+      "id": "4c614cd1-020d-4607-ab21-d1f49fcaf846",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code should be placed in an n8n Function node\n\n// Get the input items\nconst items = $input.all();\n\n// Process each item in the array\nreturn items.map(item => {\n  // Create a new value for the count field\n  let newCount = 1;\n  \n  // If there's an existing counter value, use it as a base\n  if (item.json && item.json.counter !== undefined) {\n    newCount = item.json.counter + 1;\n  }\n  \n  // Ensure json property exists\n  if (!item.json) {\n    item.json = {};\n  }\n  \n  // Set the value to the new field name \"count\"\n  item.json.count = newCount;\n  \n  // Return the modified item\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        416
+      ],
+      "id": "234edbf8-4bd2-4116-8e48-847a7014d854",
+      "name": "Increses Counter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "efdc4dc8-a1d7-4b90-ad02-ce3508bf4060",
+              "name": "Count",
+              "value": "={{ $json.count }}",
+              "type": "number"
+            },
+            {
+              "id": "c890e4c4-38fa-4c6a-8a47-046cfcfb67b4",
+              "name": "Cursor",
+              "value": "={{ $('Set Increase2').item.json.cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        416
+      ],
+      "id": "8ea6f5b7-cbbe-4fd1-bb15-e1761653711b",
+      "name": "Set Count and Cursor1"
+    },
+    {
+      "parameters": {
+        "content": "# Node Explainion\n \n## Counter Node: Cursor\n\nPagination Loop\nTwo words combined:\n\nPagination\nWhen a large set of data is split into smaller chunks (pages) instead of delivering everything at once. Just like how Google search results are split across multiple pages rather than showing 10 million results at once.\n\nLoop\nA process that repeats itself automatically until a condition is met.\n\nCombined = Pagination Loop\nA workflow/code that automatically keeps fetching the next page, over and over, until it has collected all the data it needs.\n\nExample for Twitter\nTwitter doesn't give you all tweets at once — it gives you 20 at a time\nEach batch comes with a cursor (a unique token like a bookmark) that says \"start from here next time\"\nSo the flow is:\n\nFetch tweets (no cursor)  →  gets tweets 1-20  +  cursor_A\nFetch tweets (cursor_A)   →  gets tweets 21-40 +  cursor_B\nFetch tweets (cursor_B)   →  gets tweets 41-60 +  cursor_C\n... and so on\nWithout the cursor, every single loop would just keep fetching the same first 20 tweets repeatedly. The cursor is what allows the workflow to \"turn the page\" and get fresh tweets each time.\n\n",
+        "height": 928,
+        "width": 768,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "53252dfc-f060-43d4-8156-5f55fc24cc66",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "876ac24a-6e03-4087-b58c-b98e399d5623",
+              "name": "Counter",
+              "value": "={{ $('Counter').item.json.counter }}",
+              "type": "number"
+            },
+            {
+              "id": "bbd120c6-3c81-468a-b688-99e1e845ed6b",
+              "name": "Cursor",
+              "value": "={{ $('Getting Tweets').item.json.next_cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        416
+      ],
+      "id": "8901bf47-a545-45c1-abc8-28ff14aabd4c",
+      "name": "Set Increase2"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        -48
+      ],
+      "id": "016ea4d5-8c3c-4b63-aac2-2ef638726c43",
+      "name": "Wait",
+      "webhookId": "a48de0a5-9dd6-45ae-83b4-4db48f2a5bd4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extracting Information": {
+      "main": [
+        [
+          {
+            "node": "Adding data into the sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getting Tweets": {
+      "main": [
+        [
+          {
+            "node": "Extracting Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Count": {
+      "main": [
+        [
+          {
+            "node": "Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Counter": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adding data into the sheets": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Set Increase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increses Counter": {
+      "main": [
+        [
+          {
+            "node": "Set Count and Cursor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Count and Cursor1": {
+      "main": [
+        [
+          {
+            "node": "Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Increase2": {
+      "main": [
+        [
+          {
+            "node": "Increses Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Getting Tweets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1b077df9-3def-4202-903d-670d10de053a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "esMg2pmnCWDfNLj5",
+  "tags": []
+}

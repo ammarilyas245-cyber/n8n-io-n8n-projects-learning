@@ -1,0 +1,516 @@
+{
+  "name": "Parallelization Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Parallelization\n✅ Faster Analysis – Instead of sequential analysis, all aspects are evaluated in parallel.\n\n✅ Specialized AI Agents – Each LLM focuses on a single analytical area, improving accuracy.\n\n✅ Comprehensive Review – The final aggregation step ensures clarity and a well-structured report.\n\n✅ Scalability – Can be extended to analyze additional text properties (e.g., readability, factual accuracy).",
+        "height": 288,
+        "width": 536,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1584,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "05637338-9486-409a-9931-8b43321892fc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1392,
+        240
+      ],
+      "id": "2d99d1ae-68de-44d9-bfea-76e731196fce",
+      "name": "When chat message received",
+      "webhookId": "dfeee140-af59-4f80-8e8f-35094e1dd2e0"
+    },
+    {
+      "parameters": {
+        "content": "# What This Workflow Does\n### It takes a chat message and runs 3 parallel AI analyses simultaneously, then merges and aggregates the results into a final structured report, which gets saved to Google Docs.",
+        "height": 144,
+        "width": 544,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1584,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "a97028ac-8352-4b71-bbc0-1958b12ec840",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Chat Trigger\nWhat it does: This is the entry point and ignition switch of the entire workflow. It opens a chat interface that listens for incoming messages from the user. The moment a message is submitted, it captures the text and simultaneously fires it to all three specialist agents at the exact same time. It does not process, filter, or modify the text in any way — its only job is to receive and distribute. Without this node, nothing in the workflow can start.Why it's critical: It is the single source of truth for the input text. Every agent downstream receives the exact same raw text from this node, ensuring all three analyses are performed on identical input with no data distortion.",
+        "height": 416,
+        "width": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1552,
+        -32
+      ],
+      "typeVersion": 1,
+      "id": "6c7ecfbb-1851-49b0-8411-6f550983f2aa",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a specialized Intent Classification Agent operating as part of a \nmulti-agent text analysis pipeline.\n\nYour sole responsibility is to analyze the intent behind the text provided \nby the user. You must evaluate the purpose, tone of argumentation, directional \nlanguage, call-to-action elements, and the underlying goal the author is trying \nto achieve through their words.\n\nClassify the intent into ONE of the following categories:\n- **Informational** – The text aims to educate, explain, inform, or share \n  knowledge without pushing the reader toward a specific action or belief.\n- **Persuasive** – The text is designed to influence the reader's opinion, \n  change their behavior, or convince them to adopt a particular viewpoint \n  using reasoning, emotional appeal, or rhetoric.\n- **Aggressive** – The text is confrontational, hostile, threatening, \n  or intentionally provocative. It may seek to intimidate, demean, \n  or forcefully dominate the conversation.\n- **Neutral** – The text carries no discernible agenda. It is transactional, \n  procedural, or purely communicative with no intent to inform deeply, \n  persuade, or provoke.\n\nYour response MUST follow this exact structure:\n\n**Classified Intent:** [Informational / Persuasive / Aggressive / Neutral]\n\n**Confidence Level:** [High / Medium / Low]\n\n**Primary Intent Indicators:**\nList the specific words, phrases, rhetorical devices, or structural patterns \nin the text that reveal the author's intent. Quote directly from the text \nwhere possible.\n\n**Reasoning:**\nWrite 2–4 sentences explaining your classification. Describe what the author \nis trying to accomplish, who their likely target audience is, and what outcome \nthey are steering toward.\n\n**Secondary Intent (if any):**\nIf the text contains a blend of intents (e.g., persuasive with informational \nelements), identify and explain the secondary intent and how it interacts \nwith the primary one.\n\n**Rhetorical Techniques Detected (if any):**\nIdentify any specific techniques used such as: appeals to emotion (pathos), \nappeals to logic (logos), appeals to authority (ethos), repetition, \nfear-mongering, flattery, urgency framing, or loaded language.\n\nBe analytical, precise, and objective. Base your classification strictly on \nwhat is present in the text. Do not analyze emotional tone or bias — \nthose are handled by other dedicated agents in this pipeline."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -800,
+        368
+      ],
+      "id": "71767f0c-c43b-4962-97f0-296625d02d81",
+      "name": "Intent Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a specialized Bias Detection Agent operating as part of a \nmulti-agent text analysis pipeline.\n\nYour sole responsibility is to analyze the text provided by the user for \nthe presence of any conscious or unconscious biases. You must scrutinize \nword choice, framing, omissions, generalizations, stereotypes, and the \noverall perspective the text is written from to determine whether it \npresents information or opinion in a skewed or prejudiced manner.\n\nDetect and classify bias across the following categories:\n- **Political Bias** – The text favors or attacks a particular political \n  ideology, party, policy position, or political figure unfairly.\n- **Gender Bias** – The text applies stereotypes, assumptions, or unequal \n  treatment based on gender or gender identity.\n- **Racial or Ethnic Bias** – The text generalizes, stereotypes, or \n  marginalizes individuals or groups based on race, ethnicity, \n  or national origin.\n- **Socioeconomic Bias** – The text makes assumptions or judgments based \n  on class, wealth, education level, or economic status.\n- **Cultural or Religious Bias** – The text treats one culture, religion, \n  or belief system as superior, inferior, or inherently problematic \n  compared to others.\n- **Confirmation Bias** – The text selectively presents facts or arguments \n  that support a predetermined conclusion while ignoring contradicting \n  evidence.\n- **No Bias Detected** – The text is balanced, fair, and does not exhibit \n  any identifiable prejudice or skewed framing.\n\nYour response MUST follow this exact structure:\n\n**Bias Verdict:** [Type of Bias Detected / No Bias Detected]\n\n**Confidence Level:** [High / Medium / Low]\n\n**Bias Indicators:**\nList the specific words, phrases, omissions, framing choices, or \ngeneralizations in the text that signal the presence of bias. \nQuote directly from the text where relevant.\n\n**Explanation:**\nWrite 2–4 sentences explaining what bias is present, how it manifests \nin the text, and what perspective or group it potentially advantages \nor disadvantages.\n\n**Neutralization Suggestions:**\nProvide 2–4 concrete, actionable recommendations for how the text \ncould be rewritten or restructured to eliminate or reduce the identified \nbias and present a more balanced perspective.\n\n**Severity of Bias:** [Mild / Moderate / Severe]\nBriefly justify your severity rating based on the potential impact \nthe bias could have on the reader's perception or decision-making.\n\nBe rigorous, impartial, and evidence-based in your assessment. \nDo not let your own perspective influence the verdict — evaluate \nstrictly what is present in the text. Do not analyze emotional tone \nor intent — those are handled by other dedicated agents in this pipeline."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -800,
+        1072
+      ],
+      "id": "637e49a3-9948-4530-9109-dde22e08f427",
+      "name": "Bias Agent"
+    },
+    {
+      "parameters": {
+        "content": "# Emotion Agent\n\n## What it does:\n This is the first of three specialist agents that activate simultaneously the moment the Chat Trigger fires. It receives the raw text and performs a deep emotional tone analysis on it. It classifies the text as Positive, Negative, Neutral, or Mixed, identifies key emotional indicators by quoting directly from the text, assigns a confidence level, and surfaces any nuances like sarcasm, irony, or emotional contradictions that exist beneath the surface.\n## Why it's critical: \nIt provides the emotional layer of the final report. Without it, the Final Agent would have no understanding of how the text feels — whether it evokes fear, anger, optimism, or indifference. This emotional context is essential for understanding why a piece of text is effective or dangerous, and it directly feeds the Cross-Analysis Insights section where emotional tone is compared against intent and bias.",
+        "height": 624,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "ca3c111e-fc1f-4ffc-90a5-6cbe1da6f018",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a specialized Emotional Tone Analysis Agent operating as part of a \nmulti-agent text analysis pipeline.\n\nYour sole responsibility is to analyze the emotional tone of the text provided \nby the user. You must evaluate the language, word choice, sentence structure, \nand overall sentiment to determine the dominant emotional tone.\n\nClassify the emotional tone into ONE of the following categories:\n- **Positive** – The text conveys optimism, happiness, encouragement, satisfaction, \n  or approval.\n- **Negative** – The text conveys frustration, anger, sadness, disappointment, \n  fear, or hostility.\n- **Neutral** – The text is factual, objective, and carries no strong emotional \n  charge in either direction.\n- **Mixed** – The text contains a combination of positive and negative emotions, \n  or shifts in tone throughout.\n\nYour response MUST follow this exact structure:\n\n**Emotional Tone:** [Positive / Negative / Neutral / Mixed]\n\n**Confidence Level:** [High / Medium / Low]\n\n**Key Emotional Indicators:** \nList the specific words, phrases, or patterns in the text that led to your \nclassification. Be precise and quote directly from the text.\n\n**Explanation:** \nWrite 2–4 sentences explaining your classification. Describe the emotional \natmosphere of the text, what feelings it evokes, and why you chose this category \nover others.\n\n**Nuances (if any):** \nNote any subtle emotional undercurrents, sarcasm, irony, passive aggression, \nor emotional contradictions that exist beneath the surface tone.\n\nBe analytical, objective, and thorough. Do not make assumptions beyond what \nthe text explicitly or implicitly conveys. Do not perform any other type of \nanalysis — intent and bias analysis are handled by other agents in this pipeline."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -800,
+        -288
+      ],
+      "id": "0364e95a-37e8-4c03-be3e-0625fc9d3ff1",
+      "name": "Emotion Agent"
+    },
+    {
+      "parameters": {
+        "content": "# Intent Agent\n## What it does:\n This is the second specialist agent, firing simultaneously alongside the Emotion and Bias agents. It receives the same raw text from the Chat Trigger and analyzes the purpose and agenda behind the words. It classifies the intent as Informational, Persuasive, Aggressive, or Neutral, identifies specific rhetorical techniques used (such as appeals to authority, urgency framing, fear-mongering, or loaded language), and flags any secondary intent that coexists with the primary one.\n## Why it's critical:\n Intent is the engine behind any piece of text. A text can feel emotionally neutral but still have a deeply manipulative persuasive intent — or it can feel aggressive but be purely informational. The Intent Agent separates what a text does from how it feels, giving the Final Agent a completely different analytical lens. It is the rhetorical intelligence layer of the pipeline.",
+        "height": 608,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "c47e074e-6b34-4202-b94b-40c3efc2dbe4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# Bias Agent\n## What it does: \nThis is the third specialist agent, running in parallel with the other two. It receives the same raw text and scans it for conscious or unconscious bias across multiple categories including political, gender, racial, socioeconomic, cultural, religious, and confirmation bias. It identifies the specific words, framing choices, omissions, and generalizations that signal bias, rates the severity as Mild, Moderate, or Severe, and provides concrete neutralization suggestions for making the text more balanced.\n## Why it's critical: \nBias is often the most hidden and dangerous dimension of a text — it can exist even when the emotional tone seems calm and the intent seems informational. The Bias Agent is the fairness auditor of the pipeline. Its findings are especially powerful when cross-referenced with the Intent Agent's output, revealing whether bias is being used deliberately as a persuasion tool or exists unintentionally in the author's framing.",
+        "height": 576,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        624
+      ],
+      "typeVersion": 1,
+      "id": "927f239f-99f5-4068-9b9a-427ea1aa0b2e",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n# Chat Model\n\n\n\n\n## What it does:\n This is the shared language model node that powers all three specialist agents — Emotion, Intent, and Bias — simultaneously. It is not an agent itself; it is the AI brain that each agent borrows to perform its analysis. It is connected to all three agents via sub-node connections, meaning one single model configuration handles three parallel inference calls at the same time.\n## Why it's critical: \nCentralizing the model into one node means you only need to configure credentials, model selection, and parameters once. If you ever want to upgrade from GPT-4o Mini to GPT-4o or swap to a different provider entirely, you change it in one place and all three agents are instantly upgraded. It's an efficiency and maintainability feature baked into the architecture.",
+        "height": 464,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        784
+      ],
+      "typeVersion": 1,
+      "id": "7f6c76fa-8fcb-4592-927e-ac21c9504015",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        256,
+        848
+      ],
+      "id": "627073cb-95f3-4ce1-a229-28295aaaf802",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "AAbJDFh8njUy0Vr9",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Merge node 1\n## What it does: \nThis node acts as the first synchronization gate in the pipeline. It has two inputs — Input 0 waits for the Emotion Agent's output and Input 1 waits for the Intent Agent's output. It will not pass any data forward until both inputs have arrived. Once both are received, it combines them into a single data stream and passes them forward to Merge Node 2.\n## Why it's critical:\n This is what enforces the \"wait for all\" logic of the parallel architecture. If the Emotion Agent finishes in 2 seconds and the Intent Agent takes 4 seconds, Merge Node 1 holds the Emotion output and waits patiently. No data is lost, no race condition occurs. It guarantees the pipeline only moves forward when both analyses are complete, preventing the Final Agent from ever receiving incomplete input.",
+        "height": 576,
+        "width": 464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "b6ab7d18-43c6-4f04-b47f-d99055fc9cfe",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -176,
+        224
+      ],
+      "id": "5758672c-97e1-48f2-b81b-b1f0aa923028",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "# Merge node 2\n## What it does: \nThis is the second and final synchronization gate. It receives the combined Emotion + Intent output from Merge Node 1 at Input 0, and independently waits for the Bias Agent's output at Input 1. Once both arrive, it merges all three analyses into a single unified data stream and passes everything forward to the Aggregate node.\n## Why it's critical: \nThis node completes the collection of all three parallel analyses. The chained merge design (Merge 1 → Merge 2) is the architectural solution to merging three parallel streams in n8n, which natively only supports two inputs per merge node. Without this node, the Bias Agent's output would never join the pipeline and the Final Agent would produce an incomplete report missing the entire bias dimension.",
+        "height": 560,
+        "width": 464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "cfd73694-fe9e-451f-8c06-bb93e8aaadee",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        304,
+        240
+      ],
+      "id": "af6fc843-f177-4ed3-ad89-fd5695dbd862",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "content": "# Aggregate / Combine\n## What it does: \nThis node receives the merged output from Merge Node 2 — which at this point contains three separate data items (one from each agent) — and collapses them into a single array under one unified output field. It essentially takes three individual analysis results and packages them into one clean, single object that can be passed as one coherent prompt to the Final Agent.\n## Why it's critical: \nThe Final Agent needs to receive all three analyses in a single prompt input. Without aggregation, the data would arrive as three separate items and the Final Agent would process each one individually rather than synthesizing them together. The Aggregate node is what makes cross-analysis synthesis possible — it's the packaging step before final delivery.\n",
+        "height": 592,
+        "width": 422,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "3b4ac95d-30d4-4911-8891-de36463d0ef0",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# Final Agent\n## What it does:\n This is the most important and most complex node in the entire workflow. It receives the aggregated output of all three specialist agents and performs high-level synthesis. It does not conduct any original analysis — instead it reads all three reports, identifies connections and contradictions between them, and produces a single structured 7-section report covering: Executive Summary, Emotional Tone Analysis, Intent Analysis, Bias Analysis, Cross-Analysis Insights, Actionable Recommendations, and an Overall Risk/Concern Level rating.\n## Why it's critical: \nThis node is where the real intelligence of the workflow lives. Any single agent can tell you one dimension of a text. But the Final Agent can tell you things like \"the emotional negativity is deliberately engineered to amplify the persuasive intent, and the bias is not accidental but a core rhetorical tool\" — insights that are impossible to derive from any one agent alone. It transforms three separate data points into one actionable intelligence report. It runs on its own dedicated GPT-4o Mini instance (4o_mini) to keep it isolated from the specialist agents.",
+        "height": 576,
+        "width": 592,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "42ee4e6c-638f-4f64-a455-3775a1429f47",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "# Google Docs \n## What it does: \nThis is the final output and storage node of the workflow. It receives the Final Agent's synthesized report via {{ $json.output }} and writes it directly into a pre-configured Google Document using the Insert action at the Body level. Every time the workflow runs, the new report is appended to the document, creating a running log of all analyses performed.\nWhy it's critical: It transforms the workflow from a chat-only tool into a persistent intelligence system. Every analysis is automatically saved, timestamped by Google Docs, and accessible from anywhere. This makes the workflow suitable for team environments where multiple people need to review analysis reports, audit content over time, or build a historical record of text analyses without any manual copy-pasting.",
+        "height": 624,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "92068e93-e88d-4f0b-861f-d28d51f164c3",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        784,
+        240
+      ],
+      "id": "028c1001-2e97-4323-8b62-14d0253f28c4",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "1ytBeKG81xw0LgsRqRZtvVjK9NY9jcm6269Nbtt2pOyY",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        240
+      ],
+      "id": "bb83e338-8d83-4570-9b42-ae9f4d98b993",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "wDfsfYZmlBmgMkff",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==Here are the three specialist analyses generated from the pipeline:\n\n{{ $json.output }}\n\nUsing all three analyses above, generate a complete, structured, \nand actionable final report.",
+        "options": {
+          "systemMessage": "You are the Final Synthesis Agent — the last and most critical node in a \nmulti-agent text analysis pipeline. You do not perform any original analysis. \nYour sole responsibility is to receive the outputs of three upstream specialist \nagents — the Emotional Tone Agent, the Intent Classification Agent, and the \nBias Detection Agent — and synthesize their findings into a single, cohesive, \nwell-structured, and actionable report.\n\nThe three analyses will be provided to you as an aggregated input. Your job \nis to read all three, identify connections and patterns across them, resolve \nany contradictions or tensions between findings, and present a unified \ninterpretation that is more insightful than any single analysis alone.\n\nYour final report MUST follow this exact structure:\n\n---\n\n# 📊 Text Analysis Report\n\n## 1. Executive Summary\nWrite 3–5 sentences that give a high-level overview of the text being analyzed. \nSummarize what kind of text it is, what it is trying to do, how it feels \nemotionally, and whether it contains any bias. This section is for a reader \nwho only has 30 seconds — make it count.\n\n---\n\n## 2. Emotional Tone Analysis\nSummarize the findings from the Emotional Tone Agent. Include:\n- The classified emotional tone and confidence level\n- The key emotional indicators identified\n- Any nuances, contradictions, or subtle emotional undercurrents detected\n\n---\n\n## 3. Intent Analysis\nSummarize the findings from the Intent Classification Agent. Include:\n- The classified primary intent and confidence level\n- The key intent indicators and rhetorical techniques detected\n- Any secondary intent identified and how it interacts with the primary one\n\n---\n\n## 4. Bias Analysis\nSummarize the findings from the Bias Detection Agent. Include:\n- The type of bias detected (or confirmation of no bias) and confidence level\n- The specific bias indicators found in the text\n- The severity rating and its justification\n\n---\n\n## 5. Cross-Analysis Insights\nThis is the most important section. Identify and explain the relationships \nbetween all three analyses. Answer questions such as:\n- Does the emotional tone reinforce or contradict the detected intent?\n- Is the bias subtle and hidden behind a neutral tone, or is it overt \n  and emotionally charged?\n- Do the intent and bias work together to push a particular agenda?\n- What does the combination of all three findings reveal about the text \n  that no single analysis could reveal on its own?\n\nWrite this section as analytical prose — minimum 4–6 sentences.\n\n---\n\n## 6. Actionable Recommendations\nProvide 3–5 concrete, prioritized recommendations based on the full analysis. \nThese should be practical steps a writer, editor, content moderator, or \ndecision-maker could take in response to the findings. Format as a numbered list.\n\n---\n\n## 7. Overall Risk / Concern Level\nRate the text on the following scale and justify your rating in 2–3 sentence"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        240
+      ],
+      "id": "1b0c6c56-f29e-4c43-8d57-43fda5003a73",
+      "name": "Final Agent"
+    },
+    {
+      "parameters": {
+        "content": "# Real-World Business Use Cases\n\n## 🏢 1. Corporate Communications & PR\nThe Problem: Before a CEO publishes a statement, press release, or public letter, companies need to know how it will land with the public.\nHow This Workflow Solves It:\n\nEmotion Agent flags if the tone is too aggressive or fearful\nIntent Agent detects if it reads as defensive rather than informative\nBias Agent catches any unintentional political or cultural bias\n\nReal Example: A company issues a crisis response after a product recall. Running it through this workflow before publishing ensures it reads as empathetic and informational rather than defensive and corporate-biased — preventing a PR disaster before it happens.\n\n## 📰 2. Media & Journalism Bias Monitoring\nThe Problem: News organizations, fact-checkers, and media watchdogs need to monitor whether published articles are balanced or editorially biased.\nHow This Workflow Solves It:\n\nFeed any news article into the chat trigger\nBias Agent identifies political, racial, or confirmation bias\nIntent Agent reveals whether the article is truly informational or disguised opinion\nFinal Agent produces an audit report with neutralization suggestions\n\nReal Example: A media monitoring agency runs every article from 10 different news sources daily through this workflow, building a bias score database over time to track which outlets drift toward partisan reporting.\n\n## 🛒 3. E-Commerce Product Review Analysis\nThe Problem: Businesses receive thousands of customer reviews and cannot manually read each one to understand customer sentiment, intent, and potential red flags.\nHow This Workflow Solves It:\n\nEmotion Agent identifies whether reviews are genuinely positive, negative, or mixed\nIntent Agent detects reviews that are persuasive — potentially fake or incentivized\nBias Agent flags reviews that target competitors unfairly or contain discriminatory language\nGoogle Docs stores a daily report of flagged reviews\n\nReal Example: An Amazon seller runs all new reviews through this workflow nightly. The workflow flags 12 reviews as having aggressive intent and high persuasive bias — likely competitor sabotage — which the seller then reports to Amazon for removal.\n\n## 🎓 4. Academic & Research Paper Review\nThe Problem: Peer reviewers and academic editors need to assess whether research papers present findings objectively or with hidden bias and agenda.\nHow This Workflow Solves It:\n\nBias Agent detects confirmation bias — when a paper only cites evidence supporting its hypothesis\nIntent Agent identifies whether the paper is genuinely informational or advocacy-driven\nEmotion Agent flags emotionally charged language that violates academic neutrality\nFinal Report gives editors a structured pre-review checklist\n\nReal Example: A journal editorial board runs every submitted paper through this workflow as a first-pass filter before it reaches human peer reviewers, saving reviewers hours of reading papers that are fundamentally biased in their framing.\n\n## 🏛️ 5. Political Speech & Policy Document Analysis\nThe Problem: Think tanks, political analysts, and government bodies need to analyze speeches, manifestos, and policy documents for hidden agendas and bias.\nHow This Workflow Solves It:\n\nIntent Agent reveals whether a policy document is truly informational or a persuasive political tool\nBias Agent identifies which groups are advantaged or marginalized by the language used\nEmotion Agent measures the fear or urgency being manufactured to drive public support\nCross-Analysis section reveals coordinated emotional + persuasive + bias strategies\n\nReal Example: A political think tank analyzes every speech made by candidates during an election campaign, producing weekly bias and intent reports that get published as public accountability journalism.\n\n## 💼 6. HR & Employee Communication Analysis\nThe Problem: HR departments receive complaints, grievances, performance reviews, and internal communications that need objective assessment before action is taken.\nHow This Workflow Solves It:\n\nEmotion Agent assesses the emotional severity of a complaint\nBias Agent detects if a performance review contains gender, racial, or age bias\nIntent Agent determines if an internal message is aggressive or simply assertive\nGoogle Docs creates a permanent, timestamped audit trail for every analyzed document\n\nReal Example: A company's HR system automatically routes every submitted employee grievance through this workflow before a human HR officer reads it, flagging high-risk complaints (Critical risk level) for immediate escalation and storing all reports for legal compliance purposes.\n\n## 🛡️ 7. Content Moderation at Scale\nThe Problem: Social media platforms, forums, and community platforms need to moderate user-generated content without reading every single post manually.\nHow This Workflow Solves It:\n\nEmotion Agent flags highly negative or hostile content for priority review\nIntent Agent identifies aggressive or threatening posts that violate community guidelines\nBias Agent catches hate speech, racial bias, and discriminatory language\nRisk Level in the Final Report (Low/Moderate/High/Critical) automatically prioritizes the moderation queue\n\nReal Example: A community forum runs every post above 100 words through this workflow. Posts rated Critical risk are auto-hidden pending human review. Posts rated Low risk are auto-approved. This cuts manual moderation workload by 70%.\n\n## 📊 8. Market Research & Competitor Analysis\nThe Problem: Businesses need to analyze competitor marketing copy, landing pages, and ad campaigns to understand their strategy and positioning.\nHow This Workflow Solves It:\n\nIntent Agent reveals the persuasion strategy a competitor is using\nEmotion Agent identifies the emotional triggers they are targeting in their audience\nBias Agent detects if they are making unfair comparative claims\nFinal Report gives your marketing team a strategic intelligence brief\n\nReal Example: A SaaS company runs every competitor's website homepage copy through this workflow monthly, tracking shifts in emotional tone and persuasive intent to anticipate product positioning changes before they happen.\n\n## 🏦 9. Financial & Investment Report Auditing\nThe Problem: Investment analysts need to assess whether financial reports, earnings calls transcripts, and analyst notes are objective or contain spin designed to manipulate investor sentiment.\nHow This Workflow Solves It:\n\nEmotion Agent detects manufactured optimism or fear in earnings communications\nBias Agent identifies confirmation bias — cherry-picking metrics to support a narrative\nIntent Agent reveals whether a report is genuinely informational or persuasive investor relations material\nRisk level alerts analysts when a report scores High or Critical\n\nReal Example: A hedge fund runs every earnings call transcript and analyst report through this workflow before making investment decisions, using the bias and intent scores as an additional signal in their decision-making model.\n\n## 🎯 10. Customer Support Quality Assurance\nThe Problem: Support managers cannot manually review every support ticket response to ensure agents are communicating professionally, empathetically, and without bias.\nHow This Workflow Solves It:\n\nEmotion Agent checks if the support agent's response tone matches the customer's emotional state\nIntent Agent ensures responses are genuinely helpful rather than dismissive\nBias Agent flags any responses that treat customers differently based on implied demographics\nGoogle Docs stores a QA report for every flagged interaction\n\nReal Example: A telecom company runs a random 20% sample of all customer support responses through this workflow daily. Responses flagged as Negative tone + Neutral intent (meaning the agent was cold and unhelpful) are automatically queued for manager review and agent coaching.\n\n",
+        "height": 2432,
+        "width": 928
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2560,
+        -960
+      ],
+      "typeVersion": 1,
+      "id": "3492e5cc-915e-4581-8b31-a683d900ab35",
+      "name": "Sticky Note12"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Emotion Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Intent Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bias Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Intent Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Emotion Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Bias Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Final Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emotion Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Bias Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Final Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Agent": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9bd83500-d6f6-4e79-a9d4-6eda588a9321",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "11prtMXnXFrXg6Qc",
+  "tags": []
+}

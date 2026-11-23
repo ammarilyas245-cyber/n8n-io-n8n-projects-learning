@@ -1,0 +1,173 @@
+{
+  "name": "Send_email (SUB_AGENT)",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "854ae6da-7538-47db-9fa2-ef34a8963cb4",
+              "name": "response",
+              "value": "sent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        0
+      ],
+      "id": "806b65c0-519f-435c-b030-9d97cbd4d822",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output[0].content[0].text.sendTo }}",
+        "subject": "={{ $json.output[0].content[0].text.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text.message }}",
+        "options": {
+          "appendAttribution": false,
+          "bccList": "={{ $json.output[0].content[0].text.bccList }}",
+          "ccList": "={{ $json.output[0].content[0].text.ccList }}",
+          "senderName": "={{ $json.output[0].content[0].text.senderName || \"Ammar Ilyas\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "5289024a-6e78-4561-ac53-122a445946ae",
+      "name": "Send a message",
+      "webhookId": "4db3edb9-3643-45c1-b2e1-ded9a7ab8e0f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "parse the 'query' and output the parameters separately."
+            },
+            {
+              "content": "={{ $json.Query }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"sendTo\": { \"type\": \"string\" },\n    \"subject\": { \"type\": \"string\" },\n    \"emailType\": { \"type\": \"string\" },\n    \"message\": { \"type\": \"string\" },\n    \"appendAttribution\": { \"type\": \"boolean\" },\n    \"bccList\": { \"type\": \"string\" },\n    \"ccList\": { \"type\": \"string\" },\n    \"senderName\": { \"type\": \"string\" }\n  },\n  \"required\": [\"sendTo\", \"subject\", \"emailType\", \"message\", \"appendAttribution\", \"bccList\", \"ccList\", \"senderName\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "9a38d235-ae70-451d-b433-ece18c4dc709",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        -16
+      ],
+      "id": "fe3c3dfa-7c56-4442-90c2-a06dea16da57",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "saveDataErrorExecution": "none",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "4ff92afc-fa56-469d-ac39-089c5a039fc3",
+  "meta": {
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "C9vEYTzDfMBbtMyG",
+  "tags": []
+}

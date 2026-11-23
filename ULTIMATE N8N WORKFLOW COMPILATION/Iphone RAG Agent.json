@@ -1,0 +1,305 @@
+{
+  "name": "Iphone RAG Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        288
+      ],
+      "id": "8688115d-983a-40d0-be02-fbbaed97ab31",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1QI_y_9di5QzaEgod3Q-U6EOMrLHoKcOp",
+          "mode": "list",
+          "cachedResultName": "iphone-17e-info.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1QI_y_9di5QzaEgod3Q-U6EOMrLHoKcOp/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -160,
+        288
+      ],
+      "id": "668012a5-600c-44b6-91a2-bda81c7c4ed3",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mbgeMTFNpNYmY1fb",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iphone-17",
+          "mode": "list",
+          "cachedResultName": "iphone-17"
+        },
+        "options": {
+          "pineconeNamespace": "Iphone-17"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        288
+      ],
+      "id": "cc0041ed-5d3d-45c2-b080-65aafbbcbf16",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "njciKZfLB3axD3h4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        512
+      ],
+      "id": "8f19e7a5-7c22-4797-85cf-e3793328c5ee",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        496
+      ],
+      "id": "048d817c-cb55-4b84-bb93-b1c0abaed98e",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -512,
+        112
+      ],
+      "id": "6dc049a4-23d9-4d8c-b545-bf8fc30ce28f",
+      "name": "When chat message received",
+      "webhookId": "11f67a7e-9245-49bf-acab-0a87216d4fb9"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Product Information Specialist with deep expertise in the \nofficial documentation provided to you via the knowledge base. \n\nYour knowledge covers the following specific topics from the official \nproduct documentation:\n\nSAFETY & HARDWARE\n- Battery safety, repair, and recycling procedures\n- Laser system classification (Class 1), safety warnings, and \n  authorized repair requirements\n- Hearing protection guidelines and hearing aid compatibility\n- Medical device interference due to magnets and radio components\n- RF/Radio Frequency exposure information and where to find it\n\nREGULATORY & COMPLIANCE  \n- FCC Part 15 and ISED Canada compliance conditions\n- On-device regulatory certification access\n- Disposal and recycling obligations under local environmental laws\n\nWARRANTY\n- One-year limited warranty covering defects in materials and \n  workmanship\n- What is NOT covered: wear and tear, accidents, abuse\n- How to claim: Apple Store, Authorized Service Provider, or by phone\n- Resolution options: repair, replacement, or refund at Apple's \n  discretion\n- Geographic restrictions on service and potential shipping charges\n- Proof of purchase may be required\n\nINSTRUCTIONS FOR BEHAVIOR\n- Answer ONLY based on the information in your knowledge base\n- If the user asks something not covered in your documentation, say:\n  \"That information is not available in my current documentation. \n  Please refer to the full user guide or contact official support.\"\n- Never fabricate specifications, policies, or procedures\n- Be clear, concise, and professional\n- When relevant, direct users to official resources such as \n  support.apple.com, apple.com/legal/warranty, or \n  apple.com/environment"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "e4f8a183-bdd6-4571-91df-f47c67fe957a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        128
+      ],
+      "id": "1fa8abd5-dad6-4eb0-8dbb-10c160b31d43",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to access information to answer the user's questions\n",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iphone-17",
+          "mode": "list",
+          "cachedResultName": "iphone-17"
+        },
+        "topK": 20,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        176
+      ],
+      "id": "14ac58bb-d589-4785-9ab0-558fc68bfb3d",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "njciKZfLB3axD3h4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        208,
+        640
+      ],
+      "id": "939ccaff-8166-4f42-9072-f3023123919f",
+      "name": "Recursive Character Text Splitter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d8239129-417d-4300-b97d-a465e7239fb6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "3d9Y2doNzZsGCpd2",
+  "tags": []
+}

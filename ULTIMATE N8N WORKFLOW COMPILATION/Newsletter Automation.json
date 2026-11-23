@@ -1,0 +1,786 @@
+{
+  "name": "Newsletter Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Newsletter Submission Form",
+        "formDescription": "Provides a structured newsletter based on the following fields.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Topic ",
+              "placeholder": "Voice AI",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Tone",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Professional "
+                  },
+                  {
+                    "option": "Funny "
+                  },
+                  {
+                    "option": "Informative "
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Audience",
+              "placeholder": "Dentist Offices"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -3088,
+        -48
+      ],
+      "id": "a7bf269c-06fc-46a9-8fb9-3b233934f58e",
+      "name": "On form submission",
+      "webhookId": "8f7ead5e-f6ac-4074-ae0c-99e61ad6ecfe"
+    },
+    {
+      "parameters": {
+        "content": "# Newsletter Automation\n",
+        "height": 80,
+        "width": 408,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3200,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "8d2825f8-a1c9-4a12-b60c-198904133e18",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Testing Topics\n\nTest Case 1 (Your Example)\n\nTopic: Generative AI in Healthcare\nTone: Inspirational\nTarget Audience: Hospital Administrators\n\n\nTest Case 2\n\nTopic: Remote Work Productivity Tools\nTone: Professional\nTarget Audience: Corporate HR Managers\n\n\nTest Case 3\n\nTopic: Sustainable Fashion Trends 2025\nTone: Funny\nTarget Audience: Fashion Retailers\n\n\nTest Case 4\n\nTopic: Cybersecurity Best Practices\nTone: Professional\nTarget Audience: Small Business Owners\n\n\nTest Case 5\n\nTopic: Electric Vehicle Technology\nTone: Inspirational\nTarget Audience: Automotive Dealerships\n\n\nTest Case 6\n\nTopic: Mental Health in the Workplace\nTone: Professional\nTarget Audience: HR Professionals\n\n\nTest Case 7\n\nTopic: NFT & Blockchain Opportunities\nTone: Funny\nTarget Audience: Tech Entrepreneurs\n\n\nTest Case 8\n\nTopic: Plant-Based Nutrition Science\nTone: Inspirational\nTarget Audience: Nutritionists & Dietitians",
+        "height": 932,
+        "width": 584,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4160,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "ee4f63ea-4639-41d7-b8a4-f738ba40aef2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2480,
+        224
+      ],
+      "id": "b6543b58-ccec-4825-aca0-0687a049a607",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "N8RWzdTlOUJklJs7",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topic: {{ $json['Topic '] }}\n\nTone: {{ $json.Tone }}\n\nTarget Audience: {{ $json['Target Audience'] }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are an AI agent responsible for planning the sections of a newsletter by creating an engaging table of contents tailored to the newsletter's topic, tone, and target audience.  \n\n## Context  \n- The newsletter will vary in topic, tone, and target audience depending on the request.  \n- Your role is to use the \"tavily\" tool to search for relevant topics and craft a high-level, engaging table of contents.  \n- The table of contents should resonate with the target audience and encourage them to read the full newsletter.  \n\n## Instructions  \n1. Analyze the incoming information, including the newsletter topic, tone, and target audience details.  \n2. Use the \"tavily\" tool to research relevant and trending subtopics related to the main newsletter topic.  \n3. Based on your findings, create a table of contents with high-level, engaging topics tailored to the target audience.  \n4. Ensure the topics align with the newsletter's tone and are structured to maintain the reader's interest.  \n5. Include brief descriptions for each section if requested.  \n\n## Tools  \n- tavily tool for internet research  \n- Predefined audience profiles (if provided)  \n\n## Examples  \n- **Input:**  \n  - Topic: \"Sustainable Living\"  \n  - Tone: Professional \n  - Target Audience: Young adults interested in eco-friendly lifestyles  \n\n- **Output:**  \n  Table of Contents:  \n  1. \"What is Sustainable Living? A Beginner's Guide\"  \n  2. \"Top 10 Small Changes for a Big Impact\"  \n  3. \"The Science Behind Sustainability: Why It Matters\"  \n  4. \"Spotlight on Innovations: Green Tech of 2025\"  \n  5. \"Inspiration Corner: Stories of Everyday Eco-Warriors\"  \n\n- **Input:**  \n  - Topic: \"Remote Work Tips\"  \n  - Tone: Professional yet motivational  \n  - Target Audience: Corporate professionals transitioning to remote work  \n\n- **Output:**  \n  Table of Contents:  \n  1. \"Remote Work Revolution: Adapting to the New Norm\"  \n  2. \"Home Office Hacks for Maximum Productivity\"  \n  3. \"Balancing Act: Work-Life Harmony Tips\"  \n  4. \"Top Collaboration Tools Every Remote Team Needs\"  \n  5. \"Success Stories: How Remote Work Changed Lives\"  \n\n## SOP (Standard Operating Procedure)  \n1. Review the provided details about the newsletter's topic, tone, and target audience.  \n2. Use the \"tavily\" tool to search for trending, relevant, and engaging subtopics.  \n3. Brainstorm 4-6 high-level topics that fit within the theme of the newsletter and appeal to the target audience.  \n4. Verify that each section aligns with the tone and goals of the newsletter.  \n5. Finalize the table of contents and, if requested, provide brief descriptions for each section.  \n\n## Final Notes  \n- Keep the topics concise and engaging to maximize interest.  \n- Adapt your tone and choice of topics to suit the specific audience profile.  \n- Always aim for a balance of informative and engaging content to maintain readership.  \n---  \nHere is the current date {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -2736,
+        -48
+      ],
+      "id": "a168ca67-7d61-46e0-9f88-699554953d4e",
+      "name": "Newsletter Expert"
+    },
+    {
+      "parameters": {
+        "content": "# Newsletter Expert AI Agent\n\n## 📋 What This Node Does\nThe Newsletter Expert's job:\n\n✅ Takes the form inputs (Topic, Tone, Target Audience)\n✅ Researches relevant subtopics using Tavily\n✅ Creates an engaging Table of Contents for the newsletter",
+        "height": 340,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2848,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "e8ff72f3-b578-4e30-bea5-246a3bbac84d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Form Submission Trigger\nType: Form Trigger Node\nFunction: Entry point for the workflow\nCollects:\n\nTopic (e.g., \"Voice AI\")\nTone (Professional/Funny dropdown)\nTarget Audience (e.g., \"Dentist Offices\")\n\n\nOutput: Triggered when user submits form via webhook\nNext Step: Passes data to Newsletter Expert",
+        "height": 452,
+        "width": 344,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3216,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "3e177213-4956-4608-9e4d-e0bda0199413",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Call this tool to search the internet for relevant information and trending topics related to the newsletter subject. Use this to gather research data that will inform the newsletter's table of contents and section topics.",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {
+          "max_results": 5,
+          "include_domains": []
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        224
+      ],
+      "id": "33541246-c03e-4d47-96ac-8e353ba327e6",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "qEuTYxTlCvnNiRSn",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Your job is to split out the table of contents into an individual item for each section. Output each section separately in a field called \"newsletterSections\". When doing so, keep in mind that the newsletter target audience is {{ $('On form submission').item.json['Target Audience'] }} and the tone of the newsletter should be {{ $('On form submission').item.json.Tone }}.\n\nHere is the table of contents:\n{{ $json.output }}\n\nOutput format: Create a JSON object with \"newsletterSections\" as an array, where each item has:\n- \"title\": The section heading\n- \"description\": A brief description of what this section covers",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\nYou are a project planning agent responsible for breaking down a newsletter table of contents into individual, actionable sections that can be researched and written independently.\n\n## Context\n- You receive a structured table of contents from the Newsletter Expert\n- Your job is to extract each section and prepare it for the content research team\n- Each section must be clear, specific, and aligned with the target audience and tone\n\n## Instructions\n1. Analyze the table of contents provided\n2. Extract each section title and its description\n3. Create a JSON array with each section as a separate object\n4. Each section object must contain:\n   - \"title\": The exact section heading (keep it compelling and on-brand)\n   - \"description\": A 1-2 sentence summary of what this section should cover\n5. Ensure each section is independent and can be researched separately\n6. Maintain consistency with the newsletter's tone and audience requirements\n\n## CRITICAL OUTPUT FORMAT\nYou MUST output ONLY a valid JSON array, nothing else. No markdown, no backticks, no explanation text.\n\nOutput format:\n[\n  {\n    \"title\": \"Section Title Here\",\n    \"description\": \"What this section covers and why it matters to the audience\"\n  },\n  {\n    \"title\": \"Another Section Title\",\n    \"description\": \"Description of this section\"\n  },\n  {\n    \"title\": \"Third Section Title\",\n    \"description\": \"Description of this section\"\n  }\n]\n\n## Important Notes\n- Do NOT combine sections - each one is separate array item\n- Keep titles punchy and audience-relevant\n- Descriptions should explain the value to the {{ $('On form submission').item.json['Target Audience'] }}\n- Maintain the {{ $('On form submission').item.json.Tone }} tone throughout\n- Output ONLY the JSON array - NO additional text, NO markdown code fences, NO explanation\n- Each object in the array is a separate newsletter section\n- Ensure valid JSON syntax with proper commas and brackets\n\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -2192,
+        -48
+      ],
+      "id": "6cfb5db2-5a58-473e-a5d9-749f75bbdc6f",
+      "name": "Project Planner"
+    },
+    {
+      "parameters": {
+        "content": "# Project Planner AI Agent\n## 🎯 What This Node Does\nThe Project Planner Agent's job:\n\n✅ Takes the Table of Contents from the Newsletter Expert output and receives the full newsletter structure\n✅ Breaks Down Into Individual Sections - Extracts each TOC item as a separate, independent section that can be researched and written on its own\n✅ Structures Data into JSON Format - Converts the TOC into clean, organized JSON with title and description for each section\n✅ Maintains Audience & Tone Context - Keeps the target audience and newsletter tone information attached to each section for consistency throughout the workflow\n",
+        "height": 468,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2304,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "eda912b6-47c9-4657-919b-f5a51f21ae74",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -48
+      ],
+      "id": "e0432e27-9bbe-4778-8308-9134f0b5a6b8",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"title\": \"Voice AI in Dentistry: An Overview\",\n    \"description\": \"Explore the fundamentals of Voice AI and its emerging role in dental practices, highlighting its potential to revolutionize patient care and office efficiency\"\n  },\n  {\n    \"title\": \"Efficiency Boost: Streamlining Operations with Voice Technology\",\n    \"description\": \"Discover how voice AI can significantly reduce operational costs, enhance patient management, and improve overall office productivity through features like automated appointment scheduling\"\n  },\n  {\n    \"title\": \"Accuracy First: Enhancing Dental Charting with Voice AI\",\n    \"description\": \"Learn about the accuracy of voice AI solutions in dental charting and documentation, ensuring precise patient records and facilitating smoother workflow\"\n  },\n  {\n    \"title\": \"Real-World Applications: Case Studies from Innovative Practices\",\n    \"description\": \"Examine successful case studies of dental offices that have integrated voice AI, showing tangible benefits such as increased patient acceptance rates and operational savings\"\n  },\n  {\n    \"title\": \"Implementation Guide for Dental Offices\",\n    \"description\": \"Step-by-step guide to integrating Voice AI into your existing dental practice systems and workflows with minimal disruption\"\n  },\n  {\n    \"title\": \"Future Trends: The Evolving Role of AI in Dentistry\",\n    \"description\": \"Discuss future predictions and trends surrounding AI in dental practices, including potential advancements in diagnostic tools and patient engagement strategies\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1808,
+        240
+      ],
+      "id": "3561646e-55a5-4cab-bb1e-88b38d897766",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "content": "# Spliting Output\n\nFunction:\n\nTakes aggregated newsletter sections array\nSplits into individual items\nCreates parallel processing paths (one per section)\nAllows Research Team to process each section independently\n\n\nOutput: 6 items (one for each newsletter section)",
+        "height": 404,
+        "width": 328,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1776,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "9db03859-d13b-44ae-a827-b8e08c1dca72",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Section Title: {{ $('Split Out').item.json.title }}\n\nSection Description: {{ $('Split Out').item.json.description }}\n\nNewsletter Target Audience: {{ $('On form submission').item.json['Target Audience'] }}\n\nNewsletter Tone: {{ $('On form submission').item.json.Tone }}\n\nPlease write the complete content for this newsletter section. Research the topic thoroughly using the tavily tool, then write engaging, well-researched content that:\n1. Matches the section description\n2. Is tailored to the target audience\n3. Maintains the specified tone\n4. Includes inline hyperlinked citations for all sources\n5. Is approximately 200-300 words",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a professional research and content writing agent. Your job is to write ONE newsletter section with inline citations.\n\n## Your Task\n1. Research the topic using the tavily tool ONCE or TWICE only\n2. Write the section content based on what you find\n3. Include inline HTML citations like: <a href=\"URL\">Source: Name</a>\n4. Then STOP - do not research more\n\n## Important\n- Write 200-300 words\n- One research call is usually enough\n- Do NOT keep researching - write after first search\n- Include citations with each fact\n- Match the tone: {{ $('On form submission').item.json.Tone }}\n- Target audience: {{ $('On form submission').item.json['Target Audience'] }}\n\n## Citation Format\nFor every fact: \"Some claim <a href=\"https://example.com\">Source: Publication</a>\"\n\n## Output\nStart writing immediately - no introductions, no planning text.\nJust the content for this newsletter section.\n\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1296,
+        -240
+      ],
+      "id": "0270ce07-5438-4432-aa97-dccbd167bfd3",
+      "name": "Research"
+    },
+    {
+      "parameters": {
+        "content": "# Researcher AI Agent\n\n## 📚What This Node Does:\n✅ Researches Section Topics Using Tavily - Takes each newsletter section title and uses the Tavily tool to search the internet for current information, trends, and credible sources relevant to that specific topic\n✅ Writes Engaging Section Content - Synthesizes research findings into compelling, well-written content (200-300 words) that is tailored to the target audience and maintains the specified newsletter tone\n✅ Integrates Citations with Sources - Embeds hyperlinked HTML citations throughout the content, ensuring every factual claim and statistic is properly attributed to its original source\n✅ Maintains Audience & Tone Consistency - Keeps the target audience and newsletter tone context in focus throughout the writing process, ensuring each section is personalized and relevant",
+        "height": 468,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1424,
+        -592
+      ],
+      "typeVersion": 1,
+      "id": "23cc6942-aa92-482e-9232-3f47d6a627cd",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        256
+      ],
+      "id": "2e418b9b-5b6a-487d-8c3d-537c564a174e",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "AAbJDFh8njUy0Vr9",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Merging Output\n\nCombine Mode: By Position\nFunction:\n\nCombines outputs from two sources:\n\nResearch Team output (content with citations)\nSplit Out original data (titles)\n\n\nSynchronizes data for next step\n\n\nOutput: 6 merged items with all section data",
+        "height": 420,
+        "width": 344,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -848,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "a0965a25-7794-4b1f-893b-75a6550bad80",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -720,
+        -64
+      ],
+      "id": "92277d1d-b807-4a06-8bf8-e6ba1680ff98",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -64
+      ],
+      "id": "3346f3ce-dde6-468a-8c75-71d8f167e80b",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Format the following newsletter sections into a single HTML newsletter. \n\nSection Titles: {{ $json.data.map(item => item.title).join(', ') }}\nSection Content: {{ $json.data.map(item => item.output).join('\\n\\n') }}\n\nTARGET AUDIENCE: {{ $('On form submission').item.json['Target Audience'] }}\nTONE: {{ $('On form submission').item.json.Tone }}\n\nInstructions:\n1. Combine all sections into one newsletter\n2. Use <h2> for each section title\n3. Keep all citations and hyperlinks\n4. Add Sources section at the end\n5. Stay under 750 words\n\nOutput ONLY this JSON structure, nothing else:\n{\n  \"output\": \"<h2>Title</h2><p>content...</p>...<h2>Sources</h2><ul>...</ul>\"\n}",
+        "options": {
+          "systemMessage": "=You are a newsletter editor formatting content into HTML.\n\nReturn ONLY this exact JSON format:\n{\n  \"output\": \"<h2>Section Title</h2>\\n<p>Content here with citations...</p>\\n<h2>Sources</h2><ul><li><a href=\\\"https://example.com\\\">Source Name</a></li></ul>\"\n}\n\nREQUIREMENTS:\n- Use <h2> for section titles\n- Use <p> for paragraph content\n- Use \\n for line breaks\n- Use <a href=\"URL\">text</a> for citations\n- Use <ul><li><a href=\"URL\">Source</a></li></ul> for sources\n- Escape all quotes with \\\"\n- Combine all sections into ONE output field\n- Keep under 750 words\n- Maintain {{ $('On form submission').item.json.Tone }} tone\n\nDO NOT add any text outside the JSON structure."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "bfd505a7-f190-4b19-ba55-61644ba48946",
+      "name": "Editor"
+    },
+    {
+      "parameters": {
+        "content": "#  Editor AI Agent \n\n## 📝What This Node Does:\n✅ Combines Multiple Sections into One Newsletter - Takes all individual newsletter sections (titles and content) from the Aggregate node and synthesizes them into a single, cohesive HTML-formatted newsletter\n✅ Formats Content with Proper HTML Structure - Applies professional HTML formatting with section headers (h2 tags), paragraph breaks, and clean layout to ensure the newsletter is readable and email-friendly\n✅ Preserves All Citations & Hyperlinks - Maintains all inline HTML citations embedded throughout the content, ensuring every source and factual claim is properly attributed with functional hyperlinks\n✅ Creates Organized Sources Section - Aggregates all sources from individual sections and compiles them into a clean, alphabetized \"Sources\" section at the end of the newsletter with consistent formattingHaiku 4.5 Extended",
+        "height": 516,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "e41f0aa3-dc80-42f3-b3b8-19349fe30c53",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# Aggregate Output\n\nFields Aggregated: \"title\" and \"output\"\nFunction:\nCollects all individual section items into arrays\nCombines 6 separate items into 2 arrays:$json.title - array of all section titles$json.output - array of all section content\nMerges lists = true (keeps duplicates if any)\nOutput: Single item with aggregated title and output arrays",
+        "height": 436,
+        "width": 328,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "e889ed3c-e23b-4fa9-918b-a37b14fb2136",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a compelling newsletter title for this HTML newsletter:\n\n{{ $json.output }}\n\nOutput only the title in plain text. No quotes, no explanation.",
+        "options": {
+          "systemMessage": "=You are a newsletter title writer.\n\nTASK:\nCreate a single, engaging title for the newsletter content provided.\n\nREQUIREMENTS:\n- Title should match this TONE: {{ $('On form submission').item.json.Tone }}\n- Title should appeal to this AUDIENCE: {{ $('On form submission').item.json['Target Audience'] }}\n- Capitalize the first letter of each word (Title Case)\n- Keep it under 10 words\n- Make it compelling and clickable\n- NO quotation marks\n- NO explanation or commentary\n\nOUTPUT FORMAT:\nReturn ONLY the title text. Nothing else.\n\nEXAMPLES:\n- Voice AI Technology: Revolutionizing Dental Practices\n- The Future of Remote Work in 2025\n- Sustainable Living: Small Changes, Big Impact"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        -64
+      ],
+      "id": "0a5a89b4-cf97-47b2-86d2-0379741ae91e",
+      "name": "Create Title"
+    },
+    {
+      "parameters": {
+        "content": "# Create Title Agent \n## 📝 What This Node Does:\n✅ Generates Compelling Newsletter Title - Takes the complete formatted newsletter HTML from the Editor and creates a single, engaging headline that captures the essence of the content\n✅ Matches Tone & Target Audience - Ensures the title aligns with the specified newsletter tone (Professional/Funny) and appeals directly to the target audience demographic\n✅ Formats Title Properly - Returns the title in Title Case with proper capitalization and keeps it concise (under 10 words) for clarity and impact\n✅ Prepares for Email Subject - Creates a clean, plain-text title that will be used as the email subject line when the newsletter is sent via Gmail",
+        "height": 516,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        -448
+      ],
+      "typeVersion": 1,
+      "id": "f8dcfcdd-a990-4512-821e-3b015f057e4a",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "sendTo": "ammarilyas245@gmail.com",
+        "subject": "={{ $json.output }}",
+        "message": "={{ $('Code in JavaScript').item.json.output }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Daily Newsletter"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        -64
+      ],
+      "id": "fce671f7-992f-49c9-860d-bdc427fae542",
+      "name": "Send a message",
+      "webhookId": "70e0e8c6-c0ce-4e2e-8364-ad5cef2f81a6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Tavily Tool \n\nFunction:\nExecutes internet searches via Tavily API\nReturns top 3 results with URLs and content\nUsed by both Newsletter Expert and Research Team\nProvides credible sources for citations\n\nData Flow:\nInput: Search query\nOutput: URL + Content snippets (formatted in \"response\" node)",
+        "height": 276,
+        "width": 552,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1616,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "d099a5b4-9464-4fa7-8b1a-fb87419e5f53",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# Structure Output Parse\nFunction:\nParses Project Planner agent response into structured JSON\nExtracts only the \"output\" field\nRemoves any extraneous text or markdown\nEnsures clean HTML output for email\n\nOutput: Clean JSON with output field",
+        "height": 224,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2240,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "74ac35fb-b860-42a3-bdf0-fd70a7e212da",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "# Chat Model: GPT-4o-mini\nFunction:\n\nReceives full HTML newsletter from Form\nGenerates compelling newsletter title\nMatches specified tone and appeals to target audience\nTitle case formatting\nMax 10 words\nReturns plain text title (no JSON)\n\nOutput: Newsletter title string (e.g., \"Enhancing Dental Practices: Voice AI Revolution\")",
+        "height": 256,
+        "width": 656,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2992,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "bf96e380-4108-4c1b-9e8e-c1db1eccea59",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "#  Openrouter (Chat Model: GPT 4.o Mini )\nFunction:\n\nReceives full HTML newsletter from Editor\nGenerates compelling newsletter title\nMatches specified tone and appeals to target audience\nTitle case formatting\nMax 10 words\nReturns plain text title (no JSON)\n\nOutput: Newsletter title string (e.g., \"Enhancing Dental Practices: Voice AI Revolution\")",
+        "height": 256,
+        "width": 768,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -992,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "e2fdad56-07a9-4ec2-887a-4ef6a565b213",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "# Send Newsletter (Gmail)\nCredential: Gmail OAuth2\nFunction:\n\nSends final newsletter via email\nEmail Configuration:\n\nTo: sender email\nSubject: Create Title output (the generated title)\nMessage: Editor output (full HTML newsletter)\nEmail Type: HTML\nSender Name: \"Daily Newsletter\"\n\n\nAppends n8n attribution: OFF\n\n\nOutput: Gmail API response (threadId, message status)",
+        "height": 580,
+        "width": 360,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1344,
+        -512
+      ],
+      "typeVersion": 1,
+      "id": "c1ae063e-ada7-43ca-9c57-dd8e59542c9f",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "# KEY FEATURES\n✅ Multi-Agent Collaboration - Newsletter Expert → Project Planner → Research Team → Editor\n✅ Web Research Integration - Tavily provides credible sources\n✅ Citation Management - HTML hyperlinks embedded in content\n✅ Content Quality Control - Structured output parser ensures clean formatting\n✅ Audience-Tailored - All agents consider tone + target audience\n✅ Professional Formatting - HTML output optimized for email\n✅ Automated Email Delivery - Gmail integration for instant distribution",
+        "height": 352,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3488,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "84fe259b-9e8e-47f8-8671-3ec3cb2834b7",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = items[0].json.output;\n\n// If it's a JSON string, parse it\nif (typeof data === 'string' && data.includes('\"output\"')) {\n  try {\n    const parsed = JSON.parse(data);\n    data = parsed.output;\n  } catch (e) {\n    // Fallback: extract with regex\n    const match = data.match(/\"output\":\\s*\"([\\s\\S]*)\"\\s*}/);\n    data = match ? match[1] : data;\n  }\n}\n\n// Unescape special characters\nif (typeof data === 'string') {\n  data = data\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\\"/g, '\"')\n    .replace(/\\\\\\//g, '/');\n}\n\nreturn [{ json: { output: data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -64
+      ],
+      "id": "853f8b3f-4220-42ce-aeeb-7914323cce16",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "# 📝 Code in JavaScript Node - What This Node Does:\n✅ Extracts Clean HTML from Editor Output - Receives potentially JSON-wrapped content from the Editor agent and extracts only the pure HTML newsletter string\n✅ Parses & Unescapes Data - Converts escaped characters (like \\n, \\\") into actual newlines and quotes, making the HTML properly formatted\n✅ Removes JSON Wrapper - Strips the { \"output\": \"...\" } wrapper to pass only the raw HTML content to Gmail\n✅ Prepares for Email Delivery - Delivers clean, citation-linked HTML directly to the Send Newsletter node without any extra formatting or JSON artifacts",
+        "height": 532,
+        "width": 392,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "1730dbe8-d9aa-4908-a680-f483ca597a4f",
+      "name": "Sticky Note18"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Newsletter Expert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Newsletter Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Project Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Newsletter Expert",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Research",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Newsletter Expert": {
+      "main": [
+        [
+          {
+            "node": "Project Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Project Planner": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Project Planner",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Research",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Editor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Create Title",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Editor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editor": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Title": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e096a939-b24e-47f1-89cd-178462a1433b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "sWG3lBHwCJx9QHcg",
+  "tags": []
+}

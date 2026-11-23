@@ -1,0 +1,709 @@
+{
+  "name": "Routing Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Routing\n✅ Optimized Response Handling – Ensures the right AI agent processes the query instead of a single generalist AI.\n\n✅ Scalable & Modular – New AI agents can be added to handle additional topics.\n\n✅ Faster & More Efficient – Reduces unnecessary LLM calls and improves response speed.\n\n✅ Human Escalation for Critical Issues – Ensures urgent problems are handled by real support staff.\n\n✅ Better User Experience – More accurate and relevant responses tailored to the customer’s needs.",
+        "height": 240,
+        "width": 800,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "b9527e6c-6afd-4b88-a2cd-32cca6ccab17",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -656,
+        208
+      ],
+      "id": "18d9d8dc-3f34-4c03-b90b-b1d8eeacc735",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        480
+      ],
+      "id": "9fa9d567-6393-483b-a5d9-9e89dbacbc10",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "M7NiT6Jnwy0FYwHt",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "High Prority ",
+              "description": "=Emails requiring immediate attention or action, typically from key stakeholders, clients, or decision-makers. These emails often contain time-sensitive requests, deadlines, or escalated issues. Keywords: urgent, ASAP, immediate, deadline, action required, high priority"
+            },
+            {
+              "category": "Customer Support ",
+              "description": "=Emails related to ongoing communication with current clients or customers, including service requests, feedback, support tickets, and inquiries. Keywords: request, inquiry, support, question, follow-up, feedback, complaint, help"
+            },
+            {
+              "category": "Promotion",
+              "description": "=Emails related to marketing campaigns, promotional offers, newsletters, or business updates from partners. Typically contain content aimed at engaging your audience or updating on promotions. Keywords: newsletter, promotion, offer, sale, campaign, marketing, launch, discount"
+            },
+            {
+              "category": "Finance",
+              "description": "=Emails related to financial matters such as invoices, billing statements, payment reminders, or expense reports. Anything involving transactions or accounting falls under this label. Keywords: invoice, payment, billing, receipt, financial, expense, account, refund"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        176
+      ],
+      "id": "bf614111-3075-495c-9bd1-bdb66864017b",
+      "name": "Email Text Classifier"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_7397304016214231264"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -448
+      ],
+      "id": "6c7d9469-d5b5-4a12-b5d7-154b2818a01b",
+      "name": "High Prority",
+      "webhookId": "8ddc2bd4-2e9c-4343-901d-577940f6b231",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_4950311996333837820"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f94a9226-c425-4146-b8c8-0ac1c0ef3026",
+      "name": "Customer Support",
+      "webhookId": "8ddc2bd4-2e9c-4343-901d-577940f6b231",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_3835324468685424980"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        544
+      ],
+      "id": "221da38f-cc8f-4ae9-9b48-e44e7d806d1e",
+      "name": "Promotion",
+      "webhookId": "8ddc2bd4-2e9c-4343-901d-577940f6b231",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_2625206992805137431"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        1136
+      ],
+      "id": "3e9ab001-3a07-4d6d-871f-e9371081500a",
+      "name": "Finance",
+      "webhookId": "8ddc2bd4-2e9c-4343-901d-577940f6b231",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email from: {{ $('Gmail Trigger').item.json.From }}\n\nEmail Subject: {{ $('Gmail Trigger').item.json.Subject }}\n\nEmail Content: {{ $('Gmail Trigger').item.json.snippet }}\n\nTask: Read this email carefully and create a brief, clear summary (2-3 sentences max) highlighting:\n1. Who sent it and why it's urgent\n2. What action or decision is needed\n3. Any important deadlines or details\n\nKeep it concise for Telegram notification.",
+        "options": {
+          "systemMessage": "=# Overview\nYou are an agent in charge of high priority emails. Your job is to read the incoming email, write a short and clear summary of what it's about and why it's urgent, then escalate it to a human immediately.\n\n## Behavior\n- Be concise — your summary should be 3-5 sentences max\n- Highlight the sender, the urgency, and what action is needed\n- Do not reply to the email yourself\n- Always use the Telegram tool to escalate\n\n## Tools\nTelegram — Use this tool to send the email summary to a human for immediate action."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        -448
+      ],
+      "id": "a1108019-c64f-4b63-bc56-fdc0ebfd1f34",
+      "name": "High Priority AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email from: {{ $('Gmail Trigger').item.json.From }}\n\nEmail: {{ $('Gmail Trigger').item.json.snippet }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\nYou are a customer support representative named Kelly. Your job is to read incoming customer emails and respond to them in a friendly, helpful, and professional manner.\n\n## Behavior\n- Always greet the customer by name if available\n- Address their issue or question directly and clearly\n- Be empathetic and patient in your tone\n- Never be rude or dismissive\n- Always sign off as: Kelly from ABC Corp\n\n## Tools\nEmail Draft — Use this tool to draft a reply to the customer's email. Make sure the subject line is relevant and the body is polite and complete."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "788552c3-60df-4385-9d28-b3fa0f782291",
+      "name": "Customer Support AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email from: {{ $('Gmail Trigger').item.json.From }}\n\nEmail: {{ $('Gmail Trigger').item.json.snippet }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\nYou are a promotions specialist named Meredith. Your job is to handle incoming emails related to marketing campaigns, promotional offers, and partnership opportunities in a friendly and professional manner.\n\n## Behavior\n- Respond enthusiastically but professionally to promotional inquiries\n- If it's a partnership or collaboration request, express interest and ask for more details\n- If it's an incoming newsletter or offer, acknowledge it and respond appropriately\n- Keep responses concise and engaging\n- Always sign off as: Meredith from ABC Corp\n\n## Tools\nEmail Draft — Use this tool to draft a reply to the promotional email. Make sure the subject line is catchy and relevant, and the body is warm and engaging."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        544
+      ],
+      "id": "1310b36e-b2e9-4784-a434-0f7f11343531",
+      "name": "Promotion Ai Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email from: {{ $('Gmail Trigger').item.json.From }}\n\nEmail: {{ $('Gmail Trigger').item.json.snippet }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\nYou are a finance specialist named Angela. Your job is to handle incoming emails related to financial matters, billing, invoices, and payments in a professional and helpful manner.\n\n## Behavior\n- Read the financial inquiry carefully and understand what the customer needs\n- Provide clear and accurate information about billing, invoices, or payment matters\n- If it's a payment issue, offer solutions or next steps\n- Be professional, courteous, and detailed in your response\n- Always sign off as: Angela from ABC Corp\n\n## Tools\nEmail Draft — Use this tool to draft a reply to the customer's financial inquiry. Make sure the subject line is clear and relevant, and the body includes specific details about their billing or payment issue."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        1136
+      ],
+      "id": "dad50a62-b8c5-4e4d-a5bf-d9642a9fcded",
+      "name": "Finance AI Agent2"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        416
+      ],
+      "id": "21417afe-4b6d-4bcd-b39a-fbd00d3a33d8",
+      "name": "Send a message",
+      "webhookId": "751e1369-3203-4872-99fb-b43b133b9853",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4QJs1eNW08bRGQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Re: Product Inquiry\",\n  \"emailBody\": \"Hi there,\\n\\nThank you for reaching out to us. We appreciate your interest in our products.\\n\\nBased on your inquiry, I wanted to provide you with more information...\\n\\nBest regards,\\nKelly\\nABC Corp\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        640
+      ],
+      "id": "0b43d3ee-6ef7-4f1a-b769-f670d9bb7bc6",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Re: Product Inquiry\",\n  \"emailBody\": \"Hi there,\\n\\nThank you for reaching out to us. We appreciate your interest in our products.\\n\\nBased on your inquiry, I wanted to provide you with more information...\\n\\nBest regards,\\nKelly\\nABC Corp\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        64
+      ],
+      "id": "eddec256-e105-4558-9384-490508e981c7",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "chatId": "=8543504492",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        -448
+      ],
+      "id": "c9d8f7a6-d974-4a21-bca2-bc4d2ff9dbd2",
+      "name": "Send a text message",
+      "webhookId": "7fc12ef6-2df0-4802-9d65-cf59e8e86847",
+      "credentials": {
+        "telegramApi": {
+          "id": "1TLWNtlfwfb0cjvp",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Trigger \n\n### Workflow starts when an email is received by the user in Gmail\nWhat it does: Monitors Gmail inbox every minute for new incoming emails. Pulls the complete email data (sender, subject, snippet, threadId, labels) and passes it to the next node.\nOutput: Raw email message with metadata ready for classification.",
+        "height": 400,
+        "width": 384,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -800,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "9ab433e6-9aef-40d5-a247-524e74574371",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n# Chat Model\n\n### The Brain behind the entire workflow\n\nWhat it does: Powers the Email Classifier with GPT-4o mini intelligence. This is the AI engine that understands email content and makes intelligent routing decisions.\nOutput: Classification result sent to the routing paths.",
+        "height": 304,
+        "width": 496,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -624,
+        448
+      ],
+      "typeVersion": 1,
+      "id": "1b7e25ca-9cec-488a-8fac-eefbc74112fc",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Email Classifier\n\nWhat it does: Uses AI (GPT-4o mini) to analyze the email content and automatically categorize it into one of 4 categories:\n\nHigh Priority\nCustomer Support\nPromotion\nFinance/Billing\n\nOutput: A category name that determines which route the email takes.",
+        "height": 480,
+        "width": 496,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "014f2512-f7a7-4139-a61f-98322ec240fe",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# High Priority\n\n## Components:\n\nGmail Label Node → Tags the email with \"High Priority\" label\nHigh Priority AI Agent → Reads the email and creates a brief summary\nTelegram Send Node → Escalates the summary to you via Telegram for immediate attention\n\nWhat it does: For urgent emails requiring immediate action, the system labels it, summarizes it, and alerts you on Telegram so you can respond ASAP.\nOutput: Email labeled + Telegram notification sent.",
+        "height": 384,
+        "width": 864,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -704
+      ],
+      "typeVersion": 1,
+      "id": "7562b35d-08fe-4d29-be79-e233e5dbf8f4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# Customer Support\n\n## Components:\n\nGmail Label Node → Tags email as \"Customer Support\"\nCustomer Support AI Agent (Kelly) → Reads customer inquiry and drafts a professional response\nEmail Draft Tool → Creates a reply draft with subject line and body\n\nWhat it does: Handles customer inquiries automatically. The agent (Kelly) understands the customer's issue and drafts a helpful, friendly reply.\nOutput: Draft email ready for review/sending.",
+        "height": 464,
+        "width": 864,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "8299400d-d210-4172-8d6f-ce9412f0155b",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Promotion\n\n## Components:\n\nGmail Label Node → Tags email as \"Promotion\"\nPromotion AI Agent (Meredith) → Reads promotional inquiry or newsletter and responds professionally\nEmail Draft Tool → Creates an engaging promotional response\n\nWhat it does: Handles marketing inquiries, partnership opportunities, and promotional communications. The agent (Meredith) responds to promotional matters in an engaging manner.\nOutput: Draft email ready for review/sending",
+        "height": 512,
+        "width": 864,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "a8a2a028-8d1e-4385-af40-7d6b78d47d53",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# Finance\n\n## Components:\n\nGmail Label Node → Tags email as \"Finance/Billing\"\nFinance AI Agent (Angela) → Reads financial inquiry (invoices, payments, billing)\nEmail Draft Tool → Creates a detailed financial response\n\nWhat it does: Handles all billing and payment inquiries. The agent (Angela) understands financial matters and provides accurate, professional responses about invoices, payments, and billing issues.\nOutput: Draft email ready for review/sending.",
+        "height": 528,
+        "width": 864,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "aa7592f7-d0c3-4b07-ac11-772a86b8927d",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Re: Product Inquiry\",\n  \"emailBody\": \"Hi there,\\n\\nThank you for reaching out to us. We appreciate your interest in our products.\\n\\nBased on your inquiry, I wanted to provide you with more information...\\n\\nBest regards,\\nKelly\\nABC Corp\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        1232
+      ],
+      "id": "3503730c-70d9-4857-9ccc-93fc3c53a0e6",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "content": "# Sending The message Through\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Telegram Send Message \nSend message to the user about the message received from the AI Agent\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Gmail Send message\n\nWhat it does: The Email Draft tool that's shared across Customer Support, Promotion, and Finance agents. Creates properly formatted email drafts with:\n\nSubject line (auto-generated by AI agent)\nEmail body (auto-generated by AI agent)\nThread ID (keeps it in the original conversation)\n\nOutput: Gmail draft ready for human review before sending.",
+        "height": 2080,
+        "width": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1040,
+        -704
+      ],
+      "typeVersion": 1,
+      "id": "1e2945f0-c403-4cc2-acce-cb9f5dd80901",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# Use Cases For This Workflow\n\nReal-World Use Cases for This Email Routing Workflow\n1. E-Commerce / Online Retail ⭐ (Most Common)\nScenario: A clothing or electronics store receives 500+ emails daily.\n\nHow it helps:\n\nHigh Priority → Product recalls, safety issues, refund disputes → Instant team alert\nCustomer Support → Order tracking, shipping issues, product questions → Auto-reply with help\nPromotion → Partnership inquiries, influencer collaborations → Routed to marketing team\nFinance → Invoice disputes, payment failures → Routed to accounting\nBenefit: Reduces response time from 24 hours to minutes.\n\n2. SaaS / Software Company ⭐ (Perfect Fit)\nScenario: Startup with 50 employees, no dedicated support staff yet.\n\nHow it helps:\n\nHigh Priority → Security breach reports, critical bugs, data loss → Alert CTO immediately\nCustomer Support → API issues, feature requests, onboarding help → Auto-draft technical replies\nPromotion → Partnership requests, reseller inquiries → Forward to sales team\nFinance → Billing, subscription issues → Auto-respond with billing info\nBenefit: One person can manage support for 100+ customers without being overwhelmed.\n\n3. Digital Agency / Freelance Business\nScenario: Freelancer or small agency managing multiple client projects.\n\nHow it helps:\n\nHigh Priority → Client emergency requests, deadline changes, project blockers → Instant notification\nCustomer Support → Project status questions, revision requests → Auto-response template (Kelly)\nPromotion → New client inquiries, referral partners → Automatically qualified leads\nFinance → Invoice follow-ups, payment reminders → Automated payment requests\nBenefit: Can focus on creative work while AI handles routine communications.\n\n4. Healthcare / Medical Practice\nScenario: Doctor's office receiving patient emails.\n\nHow it helps:\n\nHigh Priority → Urgent medical concerns, medication refill emergencies → Alert doctor immediately\nCustomer Support → Appointment requests, test result questions → Auto-schedule or provide info\nPromotion → Clinic promotions, health seminars → Marketing emails\nFinance → Insurance claims, billing disputes → Route to billing department\nBenefit: Critical health issues never get lost in the inbox.\n\n5. Financial Services / Investment Firm\nScenario: Investment advisor managing client inquiries.\n\nHow it helps:\n\nHigh Priority → Market alerts, urgent portfolio issues, withdrawal requests → Instant alert\nCustomer Support → Account questions, statement clarifications → Auto-draft responses\nPromotion → New service offerings, partnership opportunities → To business development\nFinance → Transaction errors, fee disputes → Routed to compliance/finance team\nBenefit: Regulatory compliance (every email tracked and routed correctly) + faster response times.\n\n6. Real Estate Agency\nScenario: Agent receiving property inquiries and leads daily.\n\nHow it helps:\n\nHigh Priority → Offers on properties, urgent buyer/seller issues → Immediate notification\nCustomer Support → Property questions, viewing requests → Auto-schedule tours or send info\nPromotion → Open house invites, new listings → Marketing outreach\nFinance → Escrow updates, commission disputes → Routed to office manager\nBenefit: Never miss a buyer inquiry; auto-qualify leads.\n\n7. Restaurant / Hospitality Business\nScenario: Restaurant receiving reservation requests, complaints, promotions.\n\nHow it helps:\n\nHigh Priority → Food safety complaints, health issues → Instant manager alert\nCustomer Support → Reservation requests, dietary questions → Auto-confirm or suggest alternatives\nPromotion → Event bookings, partnership inquiries → Routed to events team\nFinance → Catering invoice disputes → Routed to accounting\nBenefit: Better customer experience + faster crisis response.\n\n8. Manufacturing / B2B Company\nScenario: Factory receiving orders, supplier emails, logistics inquiries.\n\nHow it helps:\n\nHigh Priority → Equipment failure, supply chain disruption, order cancellation → Plant manager alert\nCustomer Support → Order status, product specifications → Auto-draft technical responses\nPromotion → New vendor inquiries, partnership proposals → Routed to procurement\nFinance → Invoice discrepancies, payment terms → Finance team\nBenefit: Production doesn't stop due to missed critical emails.\n\n9. Nonprofit / NGO\nScenario: Small nonprofit handling donations, volunteer inquiries, grant applications.\n\nHow it helps:\n\nHigh Priority → Major donor issues, crisis situations → Executive director alert\nCustomer Support → Volunteer applications, event inquiries → Auto-respond with info\nPromotion → Partnership opportunities, media inquiries → Communications team\nFinance → Donation issues, grant deadline reminders → Fundraiser alert\nBenefit: Small team can manage large number of stakeholder communications.\n\n10. Education / Online Course Platform\nScenario: Course creator receiving student inquiries daily.\n\nHow it helps:\n\nHigh Priority → Refund requests, technical issues blocking learning → Instant resolution\nCustomer Support → Course questions, module confusion → Auto-draft helpful responses\nPromotion → Affiliate inquiries, partnership offers → New revenue opportunities\nFinance → Payment failures, invoice questions → Auto-respond with payment info\nBenefit: Students get faster answers; creator can focus on course creation.\n\nKey Benefits Across All Industries\nBenefit\tImpact\nInstant Alert System\tCritical issues never go unnoticed\n24/7 Auto-Responses\tCustomers get instant acknowledgment\nReduced Manual Work\tSave 10+ hours/week on email sorting\nConsistent Responses\tAll customers get professional, branded replies\nBetter Organization\tEvery email auto-labeled and categorized\nScalability\tHandle 5x more emails with same team\nCost Reduction\tLess need for full-time support staff\nFaster Resolution Times\tRight person sees it immediately\nWhy This Workflow is Valuable\n✅ Problem It Solves: Email overload + missed important messages\n\n✅ Who Needs It: Anyone getting 50+ emails/day\n\n✅ ROI: 1 person can now handle work of 2-3 people\n\n✅ Easy to Customize: Add/remove categories, change agent names, adjust rules\n\n\n\n\n\n\n\n",
+        "height": 2144,
+        "width": 976
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1328,
+        -752
+      ],
+      "typeVersion": 1,
+      "id": "c9b9e96c-7fa8-426c-a239-3474e7ae1682",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Email Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "High Priority AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Customer Support AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Promotion Ai Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Finance AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "High Prority",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Customer Support",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Promotion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Finance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Prority": {
+      "main": [
+        [
+          {
+            "node": "High Priority AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Support": {
+      "main": [
+        [
+          {
+            "node": "Customer Support AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Promotion": {
+      "main": [
+        [
+          {
+            "node": "Promotion Ai Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance": {
+      "main": [
+        [
+          {
+            "node": "Finance AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Support AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Promotion Ai Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Promotion Ai Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Customer Support AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Priority AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Finance AI Agent2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5cfb0a7e-e730-4ebc-bc8a-0a2e3b44f08f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "jjng1zFpNq9KCSIQ",
+  "tags": []
+}

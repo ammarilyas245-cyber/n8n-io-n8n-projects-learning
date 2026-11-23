@@ -1,0 +1,463 @@
+{
+  "name": "Evaluator-Optimizer",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Evaluator-Optimizer\n✅ Ensures High-Quality Outputs – AI doesn’t just generate code, it verifies and refines until all requirements are met.\n\n✅ Reduces Errors & Manual Review – Automates verification, minimizing the need for human debugging.\n\n✅ Flexible & Scalable – Can be adapted to content generation, structured data validation, and UI text refinement.\n\n✅ Optimized AI Performance – The iterative approach ensures continuous improvement of AI-generated responses.",
+        "height": 220,
+        "width": 820,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1408,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "5dc04dd5-54e5-4160-ba2c-d51146194311",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -848,
+        544
+      ],
+      "id": "d6b06ca3-299a-4979-92e7-744fbbdfc583",
+      "name": "When chat message received",
+      "webhookId": "06ae4a4a-8317-4e44-8a7f-9686499da799"
+    },
+    {
+      "parameters": {
+        "content": "# Chat Trigger\n## \"When chat message received\"\n### What it does:\n\nActs as the entry point for the entire workflow\nListens for user input via chat interface\nCaptures biographical information about a person\n\n### Why it's important:\n\nWithout this, there's no user interaction\nIt's the initiator that starts the entire automation\nReceives the raw data (name, interests, personality, quotes) that feeds the system",
+        "height": 464,
+        "width": 464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1056,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "1cdba94f-1599-4f6d-8999-8d2a79c2212a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# Overview\nYou are an expert biography writer. You will receive information about a person, and your job is to create an entire profile using the information they give you. You are allowed to be creative."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -432,
+        544
+      ],
+      "id": "9ff7efb3-6257-4713-9728-58bf0aea956d",
+      "name": "Biography Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        1072
+      ],
+      "id": "209757b3-333b-4353-be57-af5a7f790a8d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3afc105-2359-4ff9-bfcd-d0f66b016a5d",
+              "name": "Bio",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        544
+      ],
+      "id": "1d19301a-66fd-459b-b54c-e12fb7b54578",
+      "name": "Set Bio"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the biography:\n{{ $json.Bio }}",
+        "options": {
+          "systemMessage": "# Biography Quality Evaluator\n\n## Your Role\nYou are a strict quality control expert. Check biographies against criteria and respond with ONLY \"Finished\" or feedback.\n\n## Criteria (ALL MUST BE MET)\n1. **Quote**: Must have a direct quote in quotation marks from the person\n2. **Humor**: Must have light humor - witty observations, funny anecdotes, or playful language\n3. **No Emojis**: Zero emojis allowed\n\n## YOUR RESPONSE - IMPORTANT\n- If ALL 3 criteria are met → Respond with ONLY: Finished\n- If ANY criterion fails → List ONLY what needs fixing\n\nDo NOT provide praise, explanations, or general commentary.\nOutput ONLY \"Finished\" or the specific fixes needed."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        544
+      ],
+      "id": "99f593b1-3c57-418d-a841-2bd3cee90284",
+      "name": "Evaluator Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Biography: {{ $('Set Bio').item.json.Bio }}\n\nFeedback: {{ $('Evaluator Agent').item.json.output }}",
+        "options": {
+          "systemMessage": "# Overview\nYou are an expert biography revisor. Your job is to take the biography and optimize it based on the feedback."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1424,
+        752
+      ],
+      "id": "a9314ce7-7708-44e0-b0a7-a8129f3bc53e",
+      "name": "Optimizer Agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fc2cb9a8-7c57-4728-a81a-f6d445a99e3f",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Finished",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        544
+      ],
+      "id": "82bf629d-1b5c-42af-996e-bdb3872ad388",
+      "name": "Evaluate Node ( If node )"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "17K0oLPlB4TiDzx-Jy5VpvRLGq_iGHxlLkuku_wRwbVk",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('Set Bio').item.json.Bio }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        224
+      ],
+      "id": "afb7c974-0bde-45b5-ab76-8474bfdfaf7c",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "wDfsfYZmlBmgMkff",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Biography Agent\n## \"Expert Biography Writer\"\n### What it does:\n\nTakes user input and generates a complete, creative biography\nUses GPT-4o mini LLM with a custom system prompt\nCreates a witty, engaging, and well-structured biography\nFollows guidelines: 250-400 words, conversational tone, includes a quote\n\n### Why it's important:\n\nThis is the creative engine of the workflow\nConverts raw biographical data into publishable content\nSets the foundation for the entire iterative process\nMust produce quality work that's close to requirements to minimize optimization loops\n\n### Key characteristics:\n✅ Creative and theatrical (embellishes appropriately)\n✅ Conversational tone (sounds like a witty friend)\n✅ Includes direct quote from the person\n✅ Zero emojis by default",
+        "height": 640,
+        "width": 592,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -576,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "599a5311-4ae7-4076-9c77-8760dc180b26",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Set Bio \n## {Edit Set Field}  \"Edit Set Field\" (Data Storage)\n### What it does:\n\nActs as a variable storage point\nStores the biography output from Biography Agent\nCan be updated throughout the workflow by the Optimizer Agent\nMakes the biography available to other nodes via reference\n\n### Why it's important:\n\nCritical data hub - holds the \"single source of truth\"\nAllows the workflow to reference the biography multiple times\nEnables the loop functionality - stores the optimized version for re-evaluation\nWithout this, data would be lost between iterations",
+        "height": 624,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "09db022f-017e-498e-a6ea-16a00c0cb24b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# Evaluate Node \n##  \"If Node\" (Decision Gate)\n### What it does:\n\nChecks if the Evaluator output equals \"Finished\"\nUses condition: {{ $json.output.trim() }} is equal to Finished\nRoutes the workflow to one of two paths\n\n### Why it's important:\n\nThe control mechanism that decides workflow direction\nPrevents infinite loops by checking for completion\nCreates the branching logic for iteration",
+        "height": 576,
+        "width": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "be4f7c75-cfc5-46b4-ab11-b28958b8d788",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# Google docs (Upload )\n## \"Push to Google Docs\"\n### What it does:\n\nTakes the final, approved biography from Set Bio\nInserts it into a Google Docs document\nUses expression: {{ $('Set Bio').item.json.bio }}\nPushes the content to your Google Drive\n\n### Why it's important:\n\nFinal destination - publishes the biography\nOnly triggered when Evaluator outputs \"Finished\"\nEnsures only quality content reaches your documents\nProvides persistent storage outside the workflow",
+        "height": 480,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "e56b6612-3e40-4ccb-90e9-ce8137a901cb",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Evaluation Agent\n## \"Expert Quality Control\"\n### What it does:\n\nStrictly evaluates the biography against 3 criteria:\n\n✅ Contains a direct quote in quotation marks\n✅ Has light humor (witty, playful, funny)\n✅ Zero emojis in the text\n\n\nOutputs either \"Finished\" or specific feedback\n\n### Why it's important:\n\nQuality gatekeeper - ensures only perfect biographies get published\nPrevents subpar content from reaching Google Docs\nProvides actionable feedback (not vague criticism)\nDetermines if another optimization loop is needed",
+        "height": 624,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "97c49f09-cfcd-4156-ac75-43b855374d0a",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# Optimization Agent\n##  \"Expert Revision Specialist\"\n### What it does:\n\nTakes the biography and the evaluator's specific feedback\nSurgically fixes only the problems mentioned\nDoesn't rewrite—preserves tone, voice, and structure\nUpdates the \"Set Bio\" variable with the improved version\n\n### Why it's important:\n\nThe improvement engine - makes targeted, intelligent revisions\nEnsures each loop gets closer to \"Finished\"\nPreserves what works while fixing what doesn't\nMinimizes unnecessary changes (prevents degradation)",
+        "height": 512,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        400
+      ],
+      "typeVersion": 1,
+      "id": "7c8ef8c0-0cda-40b3-b1b4-a726034f3025",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "#  Evaluator-Optimizer Workflow - How It Works\n\n1. User sends a chat message that triggers the workflow with biographical information.\n2. Biography Agent generates an initial creative biography using GPT-4o mini, and the result is stored for processing.\n3. Evaluator Agent checks the biography against three criteria: includes a quote, uses light humor, and contains no emojis—outputting feedback or \"Finished.\"\n4. Quality Gate: If evaluation is \"Finished,\" the biography proceeds to Google Docs; if not, it goes to the Optimizer   Agent.\n5. Optimizer Agent refines the biography based on evaluator feedback, then loops back for re-evaluation.\nLoop continues until all criteria are met, then the final biography is automatically pushed to Google Docs.",
+        "height": 252,
+        "width": 820,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1408,
+        -32
+      ],
+      "typeVersion": 1,
+      "id": "2ace989f-868a-49b8-8a2f-c6c1afe2aba9",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# Chat Model",
+        "height": 208,
+        "width": 400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "1bed4cf9-2096-43e8-a08e-7b720bc240e6",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# 💼 Real-World Business Use Cases - Client Deliverables\n\n## 🎯 1. Recruitment & HR Services\nUse Case: Automated Employee Bio/Profile Generation\nProblem Solved:\n\nCompanies need professional bios for team websites, LinkedIn, corporate directories\nManual writing is time-consuming and inconsistent quality\nMultiple revisions required before approval\n\nDeliverable:\nInput: Employee basic info (name, role, background, interests)\n         ↓\nOutput: Polished professional bio in Google Docs\n         ✅ Consistent tone across all employees\n         ✅ Quality-checked and approved\n         ✅ Ready to publish\nClient Value:\n\n✅ 10x faster bio creation\n✅ Consistent brand voice\n✅ Automated quality control\n✅ Scalable (hundreds of employees)\n\nPricing Model:\n\nPer bio: $50-150\nMonthly retainer for ongoing: $2,000-5,000\n\n\n## 📝 2. Content Marketing Agencies\nUse Case: Blog Post & Article Generation\nProblem Solved:\n\nContent writers need assistance with drafts\nEvery article requires editorial review\nMultiple rounds of revisions before publication\nMaintains brand voice and SEO standards\n\nDeliverable:\nInput: Article topic, target keywords, outline\n         ↓\nAI generates draft → Evaluator checks for:\n  ✅ SEO compliance\n  ✅ Brand tone consistency\n  ✅ Readability score\n  ✅ Fact accuracy (manual checks)\n         ↓\nOutput: Publication-ready article in Google Docs\nEvaluation Criteria:\n\nSEO keywords included naturally\nBrand voice maintained\nNo AI-generated clichés\nProper formatting & headers\nCall-to-action included\n\nClient Value:\n\n✅ 3x faster content production\n✅ Consistent quality across writers\n✅ Reduced editorial overhead\n✅ Scalable content teams\n\nPricing Model:\n\nPer article: $300-800\nMonthly retainer: $5,000-15,000\n\n\n## 🏨 3. Hospitality & Tourism\nUse Case: Hotel/Attraction Description Generator\nProblem Solved:\n\nHotels need descriptions for 50+ rooms/amenities\nTravel sites require unique, engaging copy\nMultiple languages needed\nQuality varies across properties\n\nDeliverable:\nInput: Room specs (size, amenities, views)\n         ↓\nGenerates engaging descriptions → Evaluator checks:\n  ✅ Persuasive & appealing language\n  ✅ Accurate amenity mentions\n  ✅ Brand tone match\n  ✅ SEO optimization for booking sites\n         ↓\nOutput: Ready for booking.com, Airbnb, website\nClient Examples:\n\n5-star hotel chain (200 properties, 3,000+ room descriptions)\nBoutique hotel groups needing unique copy\nAirbnb/VRBO property managers\n\nClient Value:\n\n✅ Increases booking conversion rates\n✅ Professional descriptions (vs. generic)\n✅ Quick turnaround for new properties\n✅ Multi-language capable\n\nPricing Model:\n\nPer property: $200-500\nAnnual contract: $20,000-50,000\n\n\n## 🛍️ 4. E-Commerce & Product Descriptions\nUse Case: Product Description Automation\nProblem Solved:\n\nE-commerce stores have hundreds/thousands of products\nManual descriptions are expensive and inconsistent\nNeed SEO optimization for discoverability\nMultiple platforms (website, Amazon, eBay, etc.)\n\nDeliverable:\nInput: Product specs (SKU, features, dimensions, price)\n         ↓\nGenerates compelling description → Evaluator checks:\n  ✅ Benefits highlighted (not just features)\n  ✅ Target audience language\n  ✅ Readability & scannability\n  ✅ SEO keywords included\n  ✅ Length appropriate for platform\n         ↓\nOutput: Platform-ready descriptions (Amazon, Shopify, etc.)\nReal Client Scenario:\n\nFashion brand: 5,000 SKUs needing descriptions\nElectronics retailer: New product launch batch\nMulti-channel e-commerce platform\n\nClient Value:\n\n✅ Reduce description cost by 90%\n✅ Faster product launches (time to market)\n✅ Consistent brand voice across 5,000+ items\n✅ SEO-optimized for higher search rankings\n\nPricing Model:\n\nPer product: $15-50\nMonthly batch: $3,000-10,000\nPlatform integration: $5,000-15,000 setup\n\n\n## 🏥 5. Medical & Healthcare\nUse Case: Patient Education Materials & Doctor Profiles\nProblem Solved:\n\nHealthcare providers need patient-friendly educational content\nDoctor bios must be professional yet approachable\nMedical accuracy is critical (legal liability)\nCompliance with HIPAA and medical standards\n\nDeliverable:\nInput: Medical condition info, doctor credentials\n         ↓\nGenerates content → Evaluator checks:\n  ✅ Medical accuracy\n  ✅ Patient-friendly language (no jargon)\n  ✅ HIPAA compliance\n  ✅ Professional tone\n  ✅ Links to relevant resources\n         ↓\nOutput: Website-ready content, patient materials\nClient Examples:\n\nHospital networks (100+ doctors)\nSpecialty clinics\nHealthcare publishers\nPharmaceutical patient education\n\nClient Value:\n\n✅ Faster patient education program rollout\n✅ Consistent medical messaging\n✅ Improved patient understanding\n✅ Reduced liability from miscommunication\n\nPricing Model:\n\nPer doctor bio: $100-300\nPer patient guide: $500-1,500\nAnnual retainer: $10,000-30,000\n\n\n## 🎓 6. Education & Training\nUse Case: Course Description & Student Profile Generation\nProblem Solved:\n\nUniversities need descriptions for 1,000+ courses\nOnline course platforms need compelling copy\nInstructor bios need consistency\nAccreditation requires specific format\n\nDeliverable:\nInput: Course syllabus, learning outcomes, instructor info\n         ↓\nGenerates descriptions → Evaluator checks:\n  ✅ Learning outcomes clearly stated\n  ✅ Engaging & motivating language\n  ✅ Proper academic formatting\n  ✅ Prerequisite clarity\n  ✅ SEO for student search\n         ↓\nOutput: Course catalogs, LMS, website, marketing materials\nClient Examples:\n\nUniversity systems (multiple campuses)\nOnline course platforms (Udemy, Coursera)\nCorporate training departments\nBootcamp providers\n\nClient Value:\n\n✅ Faster course launch\n✅ Increased enrollment (better descriptions)\n✅ Consistent academic standards\n✅ Reduced administrative burden\n\nPricing Model:\n\nPer course: $200-500\nAnnual retainer: $15,000-40,000\n\n\n## 🌟 7. Real Estate\nUse Case: Property Listing Description Generator\nProblem Solved:\n\nRealtors manage 50-500+ listings\nEach needs unique, compelling description\nMultiple platform formats (MLS, Zillow, Realtor.com)\nTime-consuming manual writing\n\nDeliverable:\nInput: Property details (beds, baths, features, location)\n         ↓\nGenerates listing → Evaluator checks:\n  ✅ Features highlighted appealingly\n  ✅ Neighborhood appeal captured\n  ✅ Emotional connection created\n  ✅ SEO keywords for home buyers\n  ✅ Platform-specific formatting\n         ↓\nOutput: MLS listings, website, marketing emails\nClient Examples:\n\nReal estate agencies (10-100+ agents)\nProperty management companies\nReal estate platforms\nCommercial real estate firms\n\nClient Value:\n\n✅ 5x faster listing creation\n✅ More competitive listings (better descriptions)\n✅ Higher engagement & showings\n✅ Agents spend time on sales, not writing\n\nPricing Model:\n\nPer listing: $50-150\nMonthly retainer: $2,000-8,000\nAnnual contracts: $20,000-50,000\n\n\n## 👔 8. Professional Services (Law, Consulting)\nUse Case: Case Study & Service Description Generation\nProblem Solved:\n\nConsulting/legal firms need case studies showcasing wins\nService descriptions must be professional & compelling\nMultiple review rounds required\nDemonstrates expertise to prospects\n\nDeliverable:\nInput: Project details, client results, challenges\n         ↓\nGenerates case study → Evaluator checks:\n  ✅ Results clearly quantified\n  ✅ Client confidentiality maintained\n  ✅ Professional tone & language\n  ✅ Compelling narrative\n  ✅ Call-to-action included\n         ↓\nOutput: Website, proposal materials, LinkedIn\nClient Value:\n\n✅ Faster case study production\n✅ Consistent quality across case studies\n✅ Better lead generation (from case studies)\n✅ Improved proposal conversion rates\n\nPricing Model:\n\nPer case study: $800-2,000\nAnnual retainer: $15,000-40,000\n\n\n## 🎬 9. Entertainment & Media\nUse Case: Creator Bio & Content Description Generator\nProblem Solved:\n\nYouTube creators need consistent channel descriptions\nActors/musicians need professional bios\nContent platforms need engaging descriptions\nMultiple social media profiles need updates\n\nDeliverable:\nInput: Creator background, achievements, style\n         ↓\nGenerates bios → Evaluator checks:\n  ✅ Personality/voice captured\n  ✅ Achievements highlighted\n  ✅ Engagement-focused language\n  ✅ Platform-specific optimization\n  ✅ Call-to-action for follows/subscriptions\n         ↓\nOutput: YouTube, Instagram, TikTok, LinkedIn, website\nClient Value:\n\n✅ Professional brand presence\n✅ Increased followers/subscribers\n✅ Consistent across platforms\n✅ Time saved on profile management\n\nPricing Model:\n\nPer creator: $200-500\nTalent agency contracts: $5,000-15,000/month\n\n\n## 📊 10. B2B SaaS & Software\nUse Case: Feature Documentation & User Guide Generation\nProblem Solved:\n\nSoftware companies need user guides for features\nHelp documentation must be accurate & clear\nNon-technical users need simple language\nDocumentation lags behind feature releases\n\nDeliverable:\nInput: Feature specs, API docs, user workflows\n         ↓\nGenerates guides → Evaluator checks:\n  ✅ Technical accuracy\n  ✅ Beginner-friendly language\n  ✅ Step-by-step clarity\n  ✅ Screenshots/examples integrated\n  ✅ SEO for support searches\n         ↓\nOutput: Help center, knowledge base, in-app guides\nClient Value:\n\n✅ Faster feature launches\n✅ Reduced support tickets\n✅ Better user onboarding\n✅ Improved product adoption\n\nPricing Model:\n\nPer feature: $300-800\nMonthly retainer: $5,000-15,000",
+        "height": 6480,
+        "width": 992
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2448,
+        -1488
+      ],
+      "typeVersion": 1,
+      "id": "a641c513-04d9-4c6f-950a-02b9cf72c5d1",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Biography Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Biography Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Evaluator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Optimizer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Biography Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Bio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Bio": {
+      "main": [
+        [
+          {
+            "node": "Evaluator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluator Agent": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Node ( If node )",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Node ( If node )": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Optimizer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optimizer Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Bio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2c3d8177-e68d-4836-9c79-158e172cd6d6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "fuvwvq4ttsYVDirx",
+  "tags": []
+}

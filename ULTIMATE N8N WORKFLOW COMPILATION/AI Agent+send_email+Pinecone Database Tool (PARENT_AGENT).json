@@ -1,0 +1,370 @@
+{
+  "name": "AI Agent+send_email+Pinecone Database Tool (PARENT_AGENT)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -928,
+        -368
+      ],
+      "id": "4951770f-dc56-4e80-806b-9c02637d68d6",
+      "name": "When chat message received",
+      "webhookId": "93f23868-f4a4-4dc5-b5a4-a484dad5acea"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "When searching Pinecone for a contact's email:\n- Search using the person's full name\n- Look through ALL results returned, not just the first one\n- Find the result containing \"Email:\" followed by an email address\n- The email format will be: Name: [name] \\nEmail: [email@domain.com]\n- Extract only the email address value after \"Email:\"\nAlways sign emails with \"Best regards, Ammar Ilyas\" \ninstead of \"[Your Name]\".\n",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -576,
+        -368
+      ],
+      "id": "540a3667-d1bd-43c7-8ed6-9a81ea81e0d2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -816,
+        -128
+      ],
+      "id": "6cd9e1f1-6db7-4603-8b7f-85e0e9465739",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search for a contact's email address by their name. \nLook through ALL returned results to find a line containing \nthe person's name followed by their email address in the \nformat \"Name: X \\nEmail: Y\". Extract and return only the \nemail address.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8ndatabase",
+          "mode": "list",
+          "cachedResultName": "n8ndatabase"
+        },
+        "topK": 20,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        -128
+      ],
+      "id": "938456ae-c3fc-4b08-a946-fcd6c5522895",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "njciKZfLB3axD3h4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        64
+      ],
+      "id": "675cf64c-06db-4b72-a4a0-5f203e11bfe1",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to send an email. The Query input should contain the recipient's email address, subject, and message body. Format: \"Send email to [email] with subject [subject] and message [message body]\"The full email details including recipient email address (found from Pinecone), subject line, and message body as a text string.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "C9vEYTzDfMBbtMyG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/C9vEYTzDfMBbtMyG",
+          "cachedResultName": "Send_email (SUB_AGENT)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Query"
+          ],
+          "schema": [
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -144
+      ],
+      "id": "eb55c17d-89e1-4402-b7b9-c4a64acaafb6",
+      "name": "Call 'Subagent send_email'"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        272
+      ],
+      "id": "bf954bda-b54a-474d-a4db-faeb8c7c22b5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "16mIEUjSeToOkR6eV6N5AOUo53vYtJyGbXLjPd5zi2g4"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        272
+      ],
+      "id": "741e832a-0c08-4de2-a7aa-f300d1d4f200",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "wDfsfYZmlBmgMkff",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        432
+      ],
+      "id": "e4e5be2f-073d-434c-9399-54af3f2a46a1",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8ndatabase",
+          "mode": "list",
+          "cachedResultName": "n8ndatabase"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        272
+      ],
+      "id": "8ebfb5ac-c8ac-407b-8597-79a4d8995abe",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "njciKZfLB3axD3h4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -704,
+        432
+      ],
+      "id": "092be36c-84fd-474d-8094-34390e350771",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "MbeSySYNIiwdSvIT",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Subagent send_email'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "saveDataErrorExecution": "none",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "05e7bcc1-76eb-4269-9ff2-b65dd3a3b79e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4065c9508cba2a514f43bce12c76e9c728d273c1647eecce1f0466f466dc8b1"
+  },
+  "id": "TDw6KeOjXcBga8gM",
+  "tags": []
+}
