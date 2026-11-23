@@ -1,0 +1,40 @@
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+token.json
+client_secret*.json
+
+# Raw n8n exports (may contain credential IDs, sheet IDs, account identifiers)
+*_raw.json
+*.raw.json
+n8n-data/
+.n8n/
+
+# Generated media (images/videos produced by the workflow)
+*.mp4
+*.mov
+media/
+output/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
