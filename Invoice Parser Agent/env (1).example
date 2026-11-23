@@ -1,0 +1,17 @@
+# Copy to `.env` and fill in. NEVER commit the real `.env`.
+
+# --- n8n runtime ---------------------------------------------------
+N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+GENERIC_TIMEZONE=Asia/Karachi
+N8N_ENCRYPTION_KEY=change-me-to-a-long-random-string
+
+# --- Values read by the workflow via $env.* ------------------------
+INVOICE_DRIVE_FOLDER_ID=
+INVOICE_SHEET_ID=
+BILLING_TEAM_EMAIL=billing@example.com
+
+# --- Reference only: stored in n8n's credential store, not read from here
+OPENAI_API_KEY=
+NVIDIA_API_KEY=
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=

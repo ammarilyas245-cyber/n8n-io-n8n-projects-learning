@@ -1,0 +1,594 @@
+{
+  "name": "Invoice Parser Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.INVOICE_DRIVE_FOLDER_ID }}"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -48
+      ],
+      "id": "dfedd8d0-bffe-4641-93b9-7d9c567f7083",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "7b3dcaa5-1966-44b7-af11-13d0e97281b9",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        -48
+      ],
+      "id": "038bdde1-7fa3-4af4-a10b-3a241c92c3a0",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Invoice Number ",
+              "description": "Contains the invoice number ",
+              "required": true
+            },
+            {
+              "name": "Sender name ",
+              "description": "The name that sends the emails ",
+              "required": true
+            },
+            {
+              "name": "Sender Email",
+              "description": "The email of the sender who has send the email",
+              "required": true
+            },
+            {
+              "name": "Sender Address ",
+              "description": "the address of the sender",
+              "required": true
+            },
+            {
+              "name": "Total Amount ",
+              "description": "the total amount of the invoice",
+              "required": true
+            },
+            {
+              "name": "Invoice date ",
+              "type": "date",
+              "description": "the date the invoice is send",
+              "required": true
+            },
+            {
+              "name": "Due Date ",
+              "type": "date",
+              "description": "The date the invoice was due",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -48
+      ],
+      "id": "01f70f85-e0bd-46b4-88f5-c47af7e66d9f",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
+      "typeVersion": 1,
+      "position": [
+        752,
+        192
+      ],
+      "id": "2d82d5ea-8a1c-47f0-86e0-655596ea52ae",
+      "name": "NVIDIA Nemotron Chat Model",
+      "credentials": {
+        "nvidiaApi": {
+          "name": "NVIDIA Nemotron account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.INVOICE_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice Number ": "={{ $json.output['Invoice Number '] }}",
+            "Sender Name": "={{ $json.output['Sender name '] }}",
+            "Sender Email": "={{ $json.output['Sender Email'] }}",
+            "Sender Address ": "={{ $json.output['Sender Address '] }}",
+            "Total Amount ": "={{ $json.output['Total Amount '] }}",
+            "Invoice Date": "={{ $json.output['Invoice date '] }}",
+            "Due Date ": "={{ $json.output['Due Date '] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Invoice Number ",
+              "displayName": "Invoice Number ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Name",
+              "displayName": "Sender Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Email",
+              "displayName": "Sender Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Address ",
+              "displayName": "Sender Address ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount ",
+              "displayName": "Total Amount ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date ",
+              "displayName": "Due Date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1440,
+        -48
+      ],
+      "id": "b6ac94dc-63d0-4360-81d1-ac2837407220",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Invoice Number :{{ $json['Invoice Number '] }}\nSender Name :{{ $json['Sender Name'] }}\nSender Email : {{ $json['Sender Email'] }}\nSender Address :{{ $json['Sender Address '] }}\nTotal Amount :{{ $json['Total Amount '] }}\nInvoice Date :{{ $json['Invoice Date'] }}\nDue Date :{{ $json['Due Date '] }}"
+            },
+            {
+              "role": "system",
+              "content": "=You are Ammar, the designated email expert for AI Tech. Your responsibility is to professionally notify the AI Tech Billing Department Team upon reciept of a new invoice.\n\n## Email Task\nUpon receiving invoice details, compare a clear and concise email to the billing team that includes:\n- Confirmation that a new invoice has been received\n- Notification that the invoice has been recorded in the Invoice Database.\n- A direct link that the   update database for their reference:\nhttps://docs.google.com/spreadsheets/d/{{ $env.INVOICE_SHEET_ID }}/edit?gid=0#gid=0\n\n## Output Format\nReturn the following components separately:\nSubject: (A short and informative email subject line)\nEmail:  (The complete body of the email to send to the billing team)"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  },\n  \"additionalProperties\": false,\n  \"required\": [\"subject\", \"body\"]\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        2112,
+        -48
+      ],
+      "id": "886cc860-d3fd-4123-9bd3-253c7370214a",
+      "name": "Email Expert  (Email Creator)",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.BILLING_TEAM_EMAIL }}",
+        "subject": "={{ $json.output[0].content[0].text.subject }}",
+        "message": "={{ $json.output[0].content[0].text.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2912,
+        -48
+      ],
+      "id": "a6a801d0-345d-4eff-bd0c-1bf52bf17a90",
+      "name": "Send a message",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Invoice Parser Agent — Workflow Documentation\n## What this workflow does\n\nEvery time a new invoice PDF is dropped into a specific Google Drive folder, this workflow automatically:\n\n1. Downloads the file\n2. Reads the text out of the PDF\n3. Uses AI to pull out the key invoice details (invoice number, sender, amount, dates)\n4. Logs those details as a new row in a Google Sheet\n5. Writes a short email to the billing team letting them know a new invoice came in and was logged\n6. Sends that email automatically\n\nNo one has to manually open invoices, copy numbers into a spreadsheet, or remember to notify billing — it all happens within a minute of the file landing in the folder.",
+        "height": 448,
+        "width": 912,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2416,
+        -768
+      ],
+      "id": "acbf444c-5d2b-46a9-af01-e6d1ff7d313f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Setup Guide\n\n## Follow these steps in order to get this workflow running from scratch:\n\n## Create/confirm the Google Drive folder\nCreate a folder named \"Invoice Parser\" (or reuse the existing one) and note its folder ID from the URL.\nUpdate the Google Drive Trigger node's \"Folder to watch\" field if using a different folder.\n## Connect Google Drive\nAdd a Google Drive OAuth2 credential (\"Google Drive account\") and authorize it with the account that owns the invoice folder.\nThis same credential is used by both the Google Drive Trigger and Download file nodes.\n## Connect NVIDIA (for invoice reading)\nAdd an NVIDIA API credential (\"NVIDIA Nemotron account\") with a valid API key.\nConfirm the model nvidia/llama-3.3-nemotron-super-49b-v1.5 is available on your NVIDIA account/plan.\n## Prepare the Google Sheet\nCreate (or confirm) the \"Invoice Details\" spreadsheet with a Sheet1 tab.\nAdd column headers matching exactly: Invoice Number  , Sender Name, Sender Email, Sender Address , Total Amount , Invoice Date, Due Date  (note: some intentionally include a trailing space — see Notes).\nAdd a Google Sheets OAuth2 credential (\"Google Sheets account\") and authorize it with access to this sheet.\n## Connect OpenAI (for writing the email)\nAdd an OpenAI API credential (\"OpenAI account\") with a valid API key that has access to gpt-4o.\nConfirm your OpenAI account supports structured JSON schema output.\n## Update the email prompt's spreadsheet link\nThe system prompt in the Email Expert node has the spreadsheet URL hardcoded. If you change spreadsheets, update this link manually inside the node.\n## Connect Gmail\nAdd a Gmail OAuth2 credential (\"Gmail account\") and authorize it with the account that should send the notification emails.\nUpdate the \"Send to\" field in the Send a message node if the billing contact's email changes (currently hardcoded to one address).\n## Test end-to-end\nDrop a sample invoice PDF into the watched folder.\nWithin a minute, confirm: a new row appears in the Google Sheet, and a notification email arrives with a subject and body.\n## Activate the workflow\nOnce testing passes, toggle the workflow to \"Publish\" so the trigger runs continuously.",
+        "height": 1472,
+        "width": 912,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2416,
+        -304
+      ],
+      "id": "28f7d35e-a836-4102-be57-e27c65db1616",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Credentials Required\n\n## 1. Google Drive \nCredential Name: \tGoogle Drive account\nType: Google Drive OAuth [Client ID/Client Secret]\nUsed In:   (Google Drive Trigger), (Download file)\nWhat You Need: A Google account with access to the \"Invoice Parser\" folder\n\n## 2. NVIDIA Account\nCredential Name:\tNVIDIA Nemotron account\nType: NVIDIA API\nUsed In: NVIDIA Nemotron Chat Model\nWhat You Need: NVIDIA API key with access to the Nemotron model\n\n## 3. Google Sheets\nCredential Name:\tGoogle Sheets account\nType: Google Sheets OAuth [Client ID/Client Secret]\nUsed In: Append row in sheet\nWhat You Need: A Google account with edit access to the \"Invoice Details\" spreadsheet\n\n## 4.  OpenAI\nCredential Name: OpenAI Account\nType: OpenAI API\nUsed In: Email Expert (Email Creator)\nWhat You Need: OpenAI API key with access to GPT-4o and structured outputs\n\n\n## 5. Gmail\nCredential Name: Gmail account\nType: Gmail OAuth [Client ID/Client Secret]\nUsed In: Send a message\nWhat You Need: A Gmail account authorized to send outgoing mail",
+        "height": 1040,
+        "width": 912
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        -304
+      ],
+      "id": "5dde8c2e-6351-4f21-ac78-fed0e4d1c22a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# 1. Google Drive Trigger\n\nThis is the starting point. It watches one specific Google Drive folder called \"Invoice Parser\" and checks it every minute for new files. As soon as any new file appears, it kicks off the rest of the workflow.\n### Credential used: Google Drive OAuth (\"Google Drive account\")",
+        "height": 496,
+        "width": 304,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -400
+      ],
+      "id": "af2b7670-540a-4119-b0ce-8f4932cc1bfd",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Download file\n\nIn plain terms: Once a new file is detected, this step actually pulls the file's content from Google Drive so the workflow can work with it.\n### Credential used: Google Drive OAuth (same account as the trigger)",
+        "height": 416,
+        "width": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -320
+      ],
+      "id": "c1d3cc07-b220-427c-93d1-e83d4f19f97e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# 3. Extract from File\n\nIn plain terms: This takes the downloaded PDF and pulls the readable text out of it — turning the invoice from a PDF image/document into plain text the AI can actually read and understand.\nReads the binary data from the previous node and outputs it as $json.text",
+        "height": 448,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -352
+      ],
+      "id": "17ef64b9-3764-44ea-9a42-42bb6567576e",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# 4. Information Extractor\n\nIn plain terms: This is where the AI reads through the invoice text and identifies the important details — who sent it, the invoice number, the total amount, and the relevant dates. Think of it as a smart form-filler that reads the document and fills in the blanks.\n\nTechnical detail:\n\nNode type: @n8n/n8n-nodes-langchain.informationExtractor\nInput text: {{ $json.text }} (from Extract from File)\nExtracts these attributes (all marked required):\nInvoice Number\nSender name\nSender Email\nSender Address\nTotal Amount\nInvoice date (typed as date)\nDue Date (typed as date)\n### System prompt instructs the AI to only extract what's explicitly present, and to skip an attribute if it can't find it\n### Runs on the NVIDIA Nemotron Chat Model node (connected as its language model, not as a separate step in the main data flow)",
+        "height": 848,
+        "width": 640,
+        "color": "#020536"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -752
+      ],
+      "id": "519d2da5-5768-4998-979f-b59428c07b69",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# 5. NVIDIA Nemotron Chat Model\nThis isn't a separate step in the flow — \nit's the AI engine plugged into the \nInformation Extractor above. \nIt's the model actually doing the \nreading and understanding.\n\n### Model: nvidia/llama-3.3-nemotron-super-49b-v1.5\n\n### Credential used: NVIDIA API (\"NVIDIA Nemotron account\")",
+        "height": 336,
+        "width": 496,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        128
+      ],
+      "id": "ce8f3608-88b2-4c6b-9f39-e0a677d36df8",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# 6. Append row in sheet\n\nIn plain terms: Once the AI has pulled out the invoice details, this step writes them into a Google Sheet as a new row — creating a running log of every invoice received.\n### Credential used: Google Sheets OAuth (\"Google Sheets account\")",
+        "height": 448,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -352
+      ],
+      "id": "808840ed-788a-4105-aa64-f4d37d0447a0",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# 7. Email Expert (Email Creator)\n\nIn plain terms: This step drafts the notification email to the billing team. It's given the invoice details and a set of instructions (acting as \"Ammar, the email expert for AI Tech\") to write a short, professional email confirming the invoice was received and logged, with a link to the spreadsheet.\n\nTechnical detail:\n\nNode type: @n8n/n8n-nodes-langchain.openAi\nModel: gpt-4o\nTwo messages sent to the model:\n1. An user-role message containing the invoice fields pulled from the previous node (Invoice Number, Sender Name, Sender Email, Sender Address, Total Amount, Invoice Date, Due Date)\n2. A system-role message defining the persona and task: confirm receipt, confirm it's logged in the Invoice Database, and include the direct spreadsheet link (hardcoded in the prompt)\n3. Structured output enforced via JSON schema — the model is required to return a JSON object with two separate fields, subject and body, rather than one blended block of text:\njson\n  {\n    \"type\": \"object\",\n    \"properties\": {\n      \"subject\": { \"type\": \"string\" },\n      \"body\": { \"type\": \"string\" }\n    },\n    \"additionalProperties\": false,\n    \"required\": [\"subject\", \"body\"]\n  }\n### Credential used: OpenAI API (\"OpenAI account\")",
+        "height": 896,
+        "width": 1056,
+        "color": "#020536"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        -816
+      ],
+      "id": "45188b29-4d57-4d8a-aff1-de043dd4eab1",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# 8. Send a message\n\nIn plain terms: The final step. This actually sends the email that was just drafted, straight to the billing contact's inbox.\n### Credential used: Gmail OAuth (\"Gmail account\")",
+        "height": 416,
+        "width": 304,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        -320
+      ],
+      "id": "5e78b502-3034-4072-80c8-00bae4c64e1d",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Nemotron Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Email Expert  (Email Creator)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Expert  (Email Creator)": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
