@@ -1,0 +1,221 @@
+{
+  "name": "Eleven Labs voice Agent  First Voice Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "REPLACE-WITH-A-RANDOM-UUID",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5824,
+        -6000
+      ],
+      "id": "a951cf5d-6072-4c19-bcda-ffd7fbc4c5eb",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email To: {{ $json.body.to }}\nEmail Content: {{ $json.body.emailcontent }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview \nYou are an AI Agent responsible for draftiing professional emails based on the user instructions. You have access to one tool: \"Google Contacts\" to find the email address. Your objective is to identify the recipient's contact information, draft a professional email and sign off as {{ $env.SENDER_NAME }} before sending.\n\n\n------\n## Tools\n- ** Google Contacts **: Retrieve the recipient's email address based on their name.\n- Input : Name (e.g,\"Brandon Stark\")\n- Output : Email Address (e.g,\"brandonstrak345@gmail.com\")\n\n## Output For email \n- Subject : Email Subject (e.g,\"Invitation to Lunch\")\n- Body : Email Body (e.g,\"Dear Ammar,I'd like to invite you to lunch today at 3:00 PM at Monal Restaurant. Looking forward to itBest regards,{{ $env.SENDER_NAME }}\")"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -5600,
+        -6000
+      ],
+      "id": "91aa1912-d967-4713-a2e0-f5739f664110",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output.recipient_email }}",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -5232,
+        -6000
+      ],
+      "id": "bcff367d-c11e-4a07-ad27-1adcee847af2",
+      "name": "Send a message",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "D0abigx2Qrn0Bjqd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "work",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        -5248,
+        -5792
+      ],
+      "id": "ac384da6-1d76-4466-8ca3-26ea50591c76",
+      "name": "Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "QF7E50dkEmwcF0Wd",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5744,
+        -5792
+      ],
+      "id": "6f8f4469-2d22-4603-b7cc-a1cc69c08319",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "VsF7rfdIPdPPdoWv",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"recipient_name\": \"Brandon Stark\",\n  \"recipient_email\": \"brandonstark345@gmail.com\",\n  \"subject\": \"Invitation to Lunch\",\n  \"body\": \"Dear Brandon,\\n\\nI'd like to invite you to lunch today at 3:00 PM at Monal Restaurant. Looking forward to it!\\n\\nBest regards,\\nYour Name\",\n  \"status\": \"ready_to_send\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -5456,
+        -5776
+      ],
+      "id": "a33c4dad-fb56-4215-b605-6ff5ba3cfcf8",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -5008,
+        -6000
+      ],
+      "id": "c44f0c56-049a-4c91-b048-aceddbccb2ca",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9aa33db7-ce8b-4daa-a576-1894a8765109",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "gmRu9m2B55eVP8tX",
+  "tags": []
+}
