@@ -1,0 +1,182 @@
+{
+  "name": "Child Workflow for Weather",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "77b19d40-24c6-4d2f-b98d-0ef797a63d51",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -448,
+        2016
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "123d996c-4a66-4c1e-9b09-314a13fb3b6a",
+              "name": "city",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        2016
+      ],
+      "id": "27d6d7d2-c028-4b9e-a20a-7211bac02079",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "cityName": "={{ $json.city }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        2016
+      ],
+      "id": "b9b73dbd-3f98-4d5b-aada-b27e351ac55d",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "JrYoeNDdTpICjxQQ",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=i am giving you open weather api result which are the deatils of the weather of any city, kindly use that information and give me the plain simple english description of the weather:\nMain:{{ $json.weather[0].main }}\nDescription:{{ $json.weather[0].description }}\nTemp:{{ $json.main.temp }}\nFeel Like:{{ $json.main.feels_like }}\nHumidity:{{ $json.main.humidity }}\nCountry:{{ $json.sys.country }}\nCity:{{ $json.name }}"
+            },
+            {
+              "role": "system",
+              "content": "you are a weather assistant agent who's responsibility is to get the information provided by the user in the \"User Message\" and give a funny response back to the user.\nUse emojis to make the text more descriptive and enjoyable to read\n "
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        2016
+      ],
+      "id": "cc47799f-85b1-4b99-8931-f88f74135110",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FpD9zSvjXsWnYGhl",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6fec86a1-821c-4116-b569-c039ae7fbca3",
+              "name": "Response",
+              "value": "={{ $json.output[0].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        2016
+      ],
+      "id": "b1d1e3d8-c173-40b3-b50d-a7cedcff405b",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "23d25c39-7520-4275-8131-a45da8fa3722",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "DWLAPmKi9sajTW2q",
+  "tags": []
+}
