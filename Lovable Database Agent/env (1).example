@@ -1,0 +1,12 @@
+# Copy to `.env` and fill in. NEVER commit the real `.env`.
+
+# --- n8n runtime ---------------------------------------------------
+GENERIC_TIMEZONE=Asia/Karachi
+# Public URL of your n8n; the Lovable app calls <WEBHOOK_URL>webhook/<path>
+WEBHOOK_URL=https://your-n8n-domain.example.com/
+
+# --- Reference only: stored in n8n's credential store, not read from here
+OPENROUTER_API_KEY=
+SERPAPI_API_KEY=
+# Secret you choose; set it in the webhook's Header Auth credential and in the Lovable app
+WEBHOOK_AUTH_TOKEN=
