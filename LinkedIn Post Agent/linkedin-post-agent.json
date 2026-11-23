@@ -1,0 +1,1440 @@
+{
+  "name": "LinkedIn Post Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        16
+      ],
+      "id": "32235dcc-2de7-4bdc-b41d-129f66fd0965",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.LINKEDIN_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "To Do"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1344,
+        208
+      ],
+      "id": "1d5b1bb2-2a9e-4cdb-836f-dac72cd5b96c",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.LINKEDIN_SHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Topic ": "={{ $('Get row(s) in sheet').item.json['Topic '] }}",
+            "Status": "Created ",
+            "Text Post Content": "={{ $('Merge').item.json['Post Text'] }}",
+            "Image Post URL": "={{ $('Merge').item.json.imageUrl }}"
+          },
+          "matchingColumns": [
+            "Topic "
+          ],
+          "schema": [
+            {
+              "id": "Topic ",
+              "displayName": "Topic ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Text Post Content",
+              "displayName": "Text Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Image Post URL",
+              "displayName": "Image Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4528,
+        96
+      ],
+      "id": "b9760666-45fc-4d3a-ac6f-1085dc788375",
+      "name": "Update row in sheet"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1696,
+        400
+      ],
+      "id": "139143bb-695d-4cbe-a465-468df0c02d26",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "# Text",
+        "height": 96,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        864,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "4f9a6a32-a61d-4f03-bc4d-a7a0c36d4148",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topic: {{ $('Get row(s) in sheet').item.json['Topic '] }}\n\n{{ $json.results.map((r, i) => `Article ${i + 1}: ${r.content}`).join('\\n\\n') }}",
+        "options": {
+          "systemMessage": "# Overview\nYou are an AI agent that writes a single concise, inspiring LinkedIn post for an entrepreneur audience, based on the reference articles provided.\n\n# Context\n- You will receive a topic and one or more reference articles on that topic.\n- Your job is to synthesize the key ideas into one short, professional LinkedIn post.\n- The post should be optimized for engagement using relevant hashtags and light emoji use.\n\n# Instructions\n1. Read all provided articles and identify the core themes, trends, or insights.\n2. Find the common thread or single overarching message across them.\n3. Write one LinkedIn post, maximum 700 characters, that blends the main insight into a unified, inspiring message.\n4. Add 2-4 relevant hashtags related to the post topic and entrepreneur interests. Hashtags must have no space after the # symbol (e.g. #AI, not # AI).\n5. Add 1-3 tasteful emojis if they genuinely add value — never more, never purely decorative.\n6. Never quote or directly reference the source articles by name. Synthesize ideas in your own words.\n7. Ground every claim in what the articles actually say. Do not invent statistics, studies, or facts not present in the source material.\n8. If fewer than 3 articles are provided, write the post from whatever is available rather than referencing a missing article.\n\n# Example\nInput: articles on AI in startups, bootstrapping, and the rise of solopreneurs.\nOutput:\n\"From AI copilots to lean bootstrapping, the age of the solopreneur is here.\nEntrepreneurs are rewriting the rules — scaling smarter, faster, and with less.\nEmbrace the shift. The tools are here. The future is solo-powered.\n#Entrepreneurship #AI #Bootstrapping #FutureOfWork\"\n\n# Output format\nOutput ONLY the final LinkedIn post text. No preamble, no explanation, no meta-commentary, no labels like \"Post:\" before it.\n\n# Final notes\n- The post must always be original phrasing, never copied from the source articles.\n- Avoid technical jargon or niche terms — keep it accessible to a general entrepreneur audience.\n- Prioritize clarity, brevity, and emotional resonance over completeness."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -608,
+        208
+      ],
+      "id": "f636fc89-6e31-436d-93e3-76354c645308",
+      "name": "Generate Text AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==Topic: {{ $('Get row(s) in sheet').item.json['Topic '] }}\n\nLinkedIn post: {{ $('Generate Text AI Agent').item.json.output }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "# Overview\nYou are an AI agent that converts a finished LinkedIn post into a single detailed image-generation prompt for an AI image model. The image should look like a modern tech/SaaS marketing graphic, not a photograph.\n\n# Context\n- You will receive the topic and the final LinkedIn post text.\n- Your output is not the LinkedIn post — it is a visual concept and generation parameters for an image model.\n- The target style is flat or isometric illustration, or a stylized 3D-rendered character/icon composition — clean, modern, tech-forward. Think SaaS product marketing graphics, not editorial photography.\n\n# Instructions\n1. Read the post closely and find one literal phrase or vivid image already suggested by its own language (e.g. \"breaking past screens,\" \"building the future,\" \"moving intelligence into the physical world\"). Anchor the entire visual concept around that phrase — do not invent a generic metaphor unrelated to the post's actual wording.\n2. Extract one short, punchy headline (3-6 words) that captures the post's core message — this will appear as bold text in the image. Instruct the model to render this text exactly as written, verbatim.\n3. Design the scene in two layers: a foreground element (the central illustrated subject or icon composition) and a background/supporting element that visually represents the \"physical,\" \"system,\" or \"outcome\" side of the concept.\n4. Explicitly state, in one short clause, what the juxtaposition of foreground and background is meant to convey — the same way a director's note would (\"this highlights...\" / \"symbolizing...\"). This is written into the prompt itself, not left implicit.\n5. Identify 2-4 short supporting concepts or keywords related to the topic that can appear as small icon+label elements in the layout.\n6. Specify a bold, modern color palette: a 2-3 color gradient or contrast scheme appropriate to a professional tech brand.\n7. Specify atmosphere and lighting in one phrase (e.g. \"optimistic and dynamic, warm light blending into cool futuristic blues\") to give the image mood, not just flat lighting.\n8. Specify layout: clean negative space, the headline prominent and legible, icon elements arranged in a grid or scattered supporting layout, generous margins.\n9. Do NOT depict real, photographed people or faces — use stylized illustrated characters, silhouettes, or abstract figures only.\n10. Do NOT include any specific company name, logo, website URL, or phone number.\n11. Do NOT fabricate statistics or claims in the headline — it must be a direct restatement of the post's core message.\n12. Write the prompt with as much descriptive detail as the concept genuinely needs — foreground, background, symbolic meaning, palette, atmosphere, and layout should each get real description rather than being compressed into a single clause. Do not pad with filler, but do not artificially shorten either.\n\n# Example\nPost: a message about AI moving beyond screens and software into physical systems like factories and machines, urging entrepreneurs to guide it with purpose.\n\nOutput:\n\"Promt\" : \"Image 1\": \"Modern isometric tech illustration, bold headline text 'AI Moves Beyond Screens' in clean white sans-serif at top, foreground: a stylized glowing digital robotic arm dissolving from a data-lattice pattern into solid polished metal, background: an illustrated factory floor with smart machines, this transition symbolizes intelligence crossing from software into the physical world, small icon labels scattered around: 'Efficiency', 'Smart Systems', 'Purpose', optimistic dynamic mood with warm light blending into futuristic blue tones, deep blue-to-violet gradient background, generous negative space, clean modern SaaS marketing style, no real people, no logos\"\n \"aspect_ratio\": \"4:5\"\n \"resolution\": \"1K\"\n\"output_format\": \"png\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        128,
+        736
+      ],
+      "id": "cfae10c2-aea9-4f64-81a7-39e0e4662761",
+      "name": "Generate Prompt AI Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data.approved }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    },
+                    "id": "8d9d10c4-02f4-4106-9e9e-388e03bf8a3d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "APPROVED CONTENT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "875a3593-b505-4ab2-be54-0e9b835f129a",
+                    "leftValue": "={{ $json.data.approved }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DISAPPROVED CONTENT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        4128,
+        240
+      ],
+      "id": "089bb544-0567-476d-a34a-5e3aca217bba",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "query": "==Latest developments in {{ $json['Topic '] }} 2026",
+        "options": {
+          "topic": "news",
+          "search_depth": "advanced",
+          "max_results": 3,
+          "include_domains": [],
+          "exclude_domains": []
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        208
+      ],
+      "id": "9fce58e8-f15c-494a-8f64-988dad94cc37",
+      "name": "Search"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -720,
+        448
+      ],
+      "id": "95556223-26c4-4ea6-abcc-7eb89ce056e6",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "content": "# Image",
+        "height": 96,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "7d43ccdb-c060-4814-9086-d4e8556bd301",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// Data is nested inside item.data\nconst data = item.data;\n\n// Parse resultJson string into object\nconst resultJson = typeof data.resultJson === 'string'\n  ? JSON.parse(data.resultJson)\n  : data.resultJson;\n\n// Extract clean video URL\nconst imageUrl = resultJson.resultUrls[0];\n\nreturn [{\n  json: {\n    imageUrl: imageUrl,\n    taskId: data.taskId,\n    model: data.model,\n    state: data.state,\n    creditsConsumed: data.creditsConsumed,\n    costTime: data.costTime\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2304,
+        672
+      ],
+      "id": "fcca7186-df36-4fc4-8442-d420f17f5511",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2656,
+        672
+      ],
+      "id": "71264d2f-81af-4967-93fe-a5990080ecab",
+      "name": "Download Image1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a8c431cd-9260-47cb-87a3-834f4d3f58b0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "46bbdafa-ee58-4c82-98c1-4370f94f2c28",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FAILED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "84036b03-5a54-43b7-bc44-fc0b05043ecb",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "waiting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "WAITING"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ed51bbf4-01a0-42dd-a9e8-eefd24c48f8c",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "queuing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Queuing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2f0b9f4c-80ae-4109-ae92-5f08bef9efce",
+                    "leftValue": "={{ $json.data.state }}",
+                    "rightValue": "generating",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GENERATING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1888,
+        688
+      ],
+      "id": "542515d7-c6ce-4dce-b357-b5aba4a5eb28",
+      "name": "Switch6"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        912
+      ],
+      "id": "cbad4e61-802c-4740-b9c5-ed9cf8620dc4",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KIE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1472,
+        736
+      ],
+      "id": "f3297f58-ca0f-4233-81e2-e4433af22367",
+      "name": "Get Image1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        912
+      ],
+      "id": "1f6361fe-3c21-40b4-9989-cc86a500d537",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "54da885a-8b8b-4c17-8c94-6ce9e6a213a3",
+              "name": "Post Text",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        192
+      ],
+      "id": "89f3f39b-5040-4ffc-af89-617b3b051b23",
+      "name": "Set Text For Post"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"Image 1\": {\n      \"type\": \"string\",\n      \"description\": \"The full image generation prompt, anchored on a literal phrase from the post, describing headline text, foreground/background composition, symbolic meaning, color palette, atmosphere, and layout.\"\n    },\n    \"aspect_ratio\": {\n      \"type\": \"string\",\n      \"description\": \"Aspect ratio for the image, e.g. 4:5\"\n    },\n    \"resolution\": {\n      \"type\": \"string\",\n      \"description\": \"Resolution for the image, e.g. 1K\"\n    },\n    \"output_format\": {\n      \"type\": \"string\",\n      \"description\": \"File format for the image, e.g. png\"\n    }\n  },\n  \"required\": [\"Image 1\", \"aspect_ratio\", \"resolution\", \"output_format\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        976
+      ],
+      "id": "e7ab3e72-183d-48f3-b56d-c32dde6168b0",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KIE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"nano-banana-pro\",\n  \"input\": {\n    \"prompt\": \"{{ $json.output['Image 1'] }}\",\n    \"image_input\": [],\n    \"aspect_ratio\": \"4:5\",\n    \"resolution\": \"1K\",\n    \"output_format\": \"png\"\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        720,
+        736
+      ],
+      "id": "5ee7183d-3e4e-4b7c-952d-bebf183ea160",
+      "name": "Send Image Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1088,
+        736
+      ],
+      "id": "e44068aa-f8ae-4816-9e26-6acda5a98a58",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3040,
+        240
+      ],
+      "id": "a48c7f1d-527b-4545-9573-a797776e0f19",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "message": "=TEXT FOR THE POST:\n{{ $('Merge').item.json['Post Text'] }}\n\nTHE IMAGE FOR THE POST IS ATTACHED ABOVE",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3760,
+        240
+      ],
+      "id": "2cfd93fd-bc11-483e-8852-2705b9d58632",
+      "name": "Send message and wait for response"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "IMAGE FOR THE POST"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3392,
+        240
+      ],
+      "id": "2222a564-d488-4f1a-b8c8-3f9d99942d3b",
+      "name": "Send a photo message"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        5312,
+        256
+      ],
+      "id": "40c860d1-219c-4e9c-a5d4-6abf3f9ae944",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        4896,
+        96
+      ],
+      "id": "4bb308ec-6695-4c77-8149-1c0e304be154",
+      "name": "Create a post"
+    },
+    {
+      "parameters": {
+        "content": "# LinkedIn Post Agent — Workflow Documentation & Setup Guide",
+        "height": 96,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        -240
+      ],
+      "id": "a5e7826f-2f6e-4245-9528-79326a9edbbe",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# What This Workflow Does\n\nEvery day (or whenever you run it manually), this workflow picks up a topic from a Google Sheet, researches the latest news on that topic, writes a LinkedIn post about it, generates a matching graphic, sends both to you on Telegram for approval, and — once you approve — publishes the post to LinkedIn and marks the row as done. If you reject it, it automatically tries again with a fresh version.\n\nIn short: Topic → Research → Write Post → Generate Image → Send for Approval → Publish → Log.",
+        "height": 368,
+        "width": 528,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        -112
+      ],
+      "id": "d18beeb5-a600-4953-a3dc-2c3fa747c9ea",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# How the Whole Flow Works \n1. You (or a daily schedule) start the workflow.\n2. It opens your \"LinkedIn Post\" Google Sheet and grabs the first row marked Status: To Do.\n3. It searches the web for the 3 most recent news articles on that row's topic.\n4. An AI agent reads those articles and writes one polished LinkedIn post (under 700 characters, with hashtags and a couple of emojis).\n5. A second AI agent turns that post into a detailed image generation prompt — describing a headline, visual concept, colors, and mood for a matching graphic.\n6. That prompt is sent to an image-generation API (kie.ai / \"nano-banana-pro\"). The workflow checks in periodically until the image is ready.\n7. The finished image is downloaded, and the post text + image are sent to you on Telegram with Approve / Disapprove buttons.\n8. If you approve: the sheet row is updated to Status \"Created\" with the final post text and image link, and the post is published to LinkedIn.\n9. If you disapprove: the workflow loops back to the research step and generates a brand-new post and image for the same topic, then asks you again.",
+        "height": 688,
+        "width": 528,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        272
+      ],
+      "id": "28152e1f-e3af-4840-aca0-bdffe8ad9f23",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# When clicking 'Execute workflow' (Manual Trigger) \nLets you run the workflow on demand for testing. Node type: manualTrigger.",
+        "height": 368,
+        "width": 288,
+        "color": "#260325"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        -192
+      ],
+      "id": "95e0a03c-b756-4cf3-bc87-97f7befcec9b",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Schedule Trigger \nRuns the workflow automatically every day at 19:00 (7 PM). Node type: scheduleTrigger, interval: daily, triggerAtHour: 19.",
+        "height": 352,
+        "width": 288,
+        "color": "#043334"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        192
+      ],
+      "id": "edcb60a2-37bf-401e-a0ab-a04aa4b99b9c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# Get row(s) in sheet \nOpens the \"LinkedIn Post\" Google Sheet and pulls the row(s) where the Status column equals \"To Do.\" This is the topic the workflow will write about. Node type: googleSheets, operation: read with filter Status = To Do, credential: Google Sheets OAuth2.",
+        "height": 448,
+        "width": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        -80
+      ],
+      "id": "386343e3-e1c8-4bf4-b56f-12dae96951e7",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# Search (Tavily) \nSearches the web for \"Latest developments in [Topic] 2026\" and returns the top 3 news results (advanced search depth). This is the raw material the AI will write from. Node type: @tavily/n8n-nodes-tavily.tavily, topic: news, max_results: 3, credential: Tavily API.",
+        "height": 448,
+        "width": 336,
+        "color": "#063B3C"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        -80
+      ],
+      "id": "b9f7e0c0-a11d-4161-9422-32f1b249ce39",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Text AI Agent \nAn AI agent (GPT-4.1) reads the topic and the 3 articles and writes a single LinkedIn post — max 700 characters, 2-4 relevant hashtags, 1-3 tasteful emojis, no direct quoting of sources, no invented facts. Output is plain text only. Node type: @n8n/n8n-nodes-langchain.agent, model: GPT-4.1 via \"OpenAI Chat Model1,\" connected LLM credential: OpenAI API.",
+        "height": 448,
+        "width": 432,
+        "color": "#120132"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -80
+      ],
+      "id": "a7da93b5-8a56-42ee-939b-c994c78baf87",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "# OpenAI Chat Model\nThe brain behind the agent that \nreads the articles and writes a\nsingle LinkedIn post",
+        "height": 176,
+        "width": 432,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        416
+      ],
+      "id": "70fb5c17-72c2-4bab-88c6-5f45588a9654",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Prompt AI Agent\n A second AI agent (GPT-4.1) reads the finished LinkedIn post and converts it into a detailed image-generation brief: a punchy headline, foreground/background visual concept, symbolic meaning, color palette, mood, and layout — styled like a modern SaaS marketing graphic. Output is forced into strict JSON via the Structured Output Parser below it. Node type: @n8n/n8n-nodes-langchain.agent, model: GPT-4.1 via \"OpenAI Chat Model,\" output parser attached.",
+        "height": 464,
+        "width": 512,
+        "color": "#120132"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "12cea3f5-f93b-4cbc-a58f-1f76467158e1",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# OpenAI Chat Model\nThe brain behind the Prompt agent that \ngenerates the prompt for the image \nfor the LinkedIn Post\n",
+        "height": 176,
+        "width": 480,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        880
+      ],
+      "id": "c59a63a7-d6a5-440b-a78f-03fdc1e5c31e",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "# Set Text For Post \nTakes the AI's raw output and stores it cleanly as a field called Post Text, so later nodes (image prompt, Telegram, Sheet update) can reference it consistently. Node type: set.",
+        "height": 368,
+        "width": 336,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "28fe7540-3aff-47c5-8390-58ddd273fdd5",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "# Structured Output Parser \nForces the AI's response into \na fixed JSON shape\n (Image 1, aspect_ratio, resolution, output_format) \nso the next node can use it reliably \ninstead of parsing free text. \nNode type: outputParserStructured.",
+        "height": 224,
+        "width": 608,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        912
+      ],
+      "id": "8c2d040b-a374-4ef6-a81b-d3e2f11c26d6",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "# Send Image Request {HTTP Request}\nSends the image prompt to the kie.ai image API (model: nano-banana-pro) to start generating the graphic. Returns a taskId used to check progress. Node type: httpRequest, method: POST, endpoint: api.kie.ai/api/v1/jobs/createTask.",
+        "height": 464,
+        "width": 368,
+        "color": "#260325"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        416
+      ],
+      "id": "981725f5-075b-4efb-b5dd-0ea73112d3da",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "# Wait \nPauses briefly before checking whether the image is ready. Node type: wait. ",
+        "height": 320,
+        "width": 336,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        560
+      ],
+      "id": "37b243a4-d869-4a03-9b1b-b17d45f86e58",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "# Get Image1 \nChecks the status of the image generation job using the taskId. Node type: httpRequest, endpoint: api.kie.ai/api/v1/jobs/recordInfo.",
+        "height": 336,
+        "width": 368,
+        "color": "#260325"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        544
+      ],
+      "id": "91f0a033-2bff-480d-84e8-899cfea538a1",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "# Switch6\nReads the job's status and routes accordingly:\n1. success → image is ready, continue\n2. failed → stop this branch (does nothing further)\n3. waiting / queuing / generating → loop back to Wait, then check again Node type: switch, checks data.state.",
+        "height": 464,
+        "width": 416,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        448
+      ],
+      "id": "3e57a50b-3941-45d8-8d46-be074561823a",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "# Code in JavaScript6 \nOnce the image is ready, this pulls the actual image file URL out of the API's nested response and extracts a few extra details (task ID, model, credits used, time taken). Node type: code (JavaScript).",
+        "height": 368,
+        "width": 336,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        448
+      ],
+      "id": "5af88388-e1b1-4594-9615-effbc9c8be59",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "# Download Image1 \nDownloads the actual image file from that URL as binary data, so it can be sent to Telegram or LinkedIn. Node type: httpRequest.",
+        "height": 336,
+        "width": 320,
+        "color": "#260325"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        464
+      ],
+      "id": "88c61e22-41d3-4626-8768-76bcbc92f778",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "# Merge \nCombines the post text (from \"Set Text For Post\") with the downloaded image (from \"Download Image1\") into one item, matched by position, so everything travels together from here on. Node type: merge, mode: combine by position.",
+        "height": 400,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2896,
+        0
+      ],
+      "id": "4a461b38-7228-4171-af77-c2204e7f1301",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "content": "# Send a photo message \nSends the generated image to your Telegram chat. Node type: telegram, operation: sendPhoto.",
+        "height": 336,
+        "width": 352,
+        "color": "#001B6B"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        64
+      ],
+      "id": "8d4c7df3-8459-4917-af15-d1f5999f0718",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "content": "# Send message and wait for response \nSends the post text to the same Telegram chat with Approve/Disapprove buttons and pauses the workflow until you respond. Node type: telegram, operation: sendAndWait, approval type: double (two buttons).",
+        "height": 464,
+        "width": 352,
+        "color": "#001B6B"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3632,
+        -64
+      ],
+      "id": "418b14ad-5289-45e6-81ab-7c26358b034c",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "content": "# Switch \nReads your Telegram response (approved: true/false) and routes:\n\n1. Approved → Update row in sheet → publish\n2. Disapproved → Limit → loop back to Search (start over on the same topic) Node type: switch, checks data.approved.",
+        "height": 464,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4016,
+        -64
+      ],
+      "id": "3189d24b-818d-4e57-a6c9-1807263838a2",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "content": "# Update row in sheet \nUpdates the original Google Sheet row: sets Status to \"Created\", and writes in the final Text Post Content and Image Post URL. Matches the correct row using the Topic column. Node type: googleSheets, operation: update.",
+        "height": 416,
+        "width": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4416,
+        -160
+      ],
+      "id": "a7cfee9c-c760-4ff6-b305-569898cc04ac",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "content": "# Limit \nPasses through only the first item to prevent duplicate/extra runs before looping back into the Search node to regenerate a new post and image. Node type: limit.",
+        "height": 352,
+        "width": 304,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5200,
+        32
+      ],
+      "id": "2835135b-7338-41ea-99b1-90bfbaf52fe5",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "# Create a post \nPublishes the approved post to LinkedIn. Node type: linkedIn",
+        "height": 288,
+        "width": 352,
+        "color": "#001B6B"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4784,
+        -32
+      ],
+      "id": "1d0adb68-d6e9-4792-953f-b9c305136b7f",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "content": "# Setup Guide\n## 1. Google Sheet\n\nCreate/confirm a Google Sheet called \"LinkedIn Post\" with these exact column headers (note the trailing space on \"Topic \"):\n\nTopic\tStatus\tText Post Content\tImage Post URL\nAdd a row for each topic you want a post about, with Status = To Do.\nThe workflow will change Status to Created automatically once a post is approved and published.\n## 2. Connect Your Accounts (Credentials)\n\nIn n8n, go to Credentials and connect the following — each corresponding node will show a red warning icon until this is done:\n\nService\tUsed By\tWhat You Need\nGoogle Sheets\tGet row(s) in sheet, Update row in sheet\tGoogle account OAuth login\nTavily\tSearch\tTavily API key (from tavily.com)\nOpenAI\tGenerate Text AI Agent, Generate Prompt AI Agent\tOpenAI API key\nkie.ai\tSend Image Request, Get Image1\tkie.ai API key (see fix below — should be moved into a proper credential rather than typed into the node)\nTelegram\tSend a photo message, Send message and wait for response\tTelegram Bot token + your chat ID\nLinkedIn\tCreate a post\tLinkedIn OAuth login (connect your LinkedIn account)\n## 3. Test It Manually First\n\nClick \"Execute workflow\" on the Manual Trigger node to run one full cycle end-to-end. Watch for:\n\nA Telegram message with an image and Approve/Disapprove buttons.\nTapping Approve should update the Google Sheet and publish to LinkedIn.\nTapping Disapprove should trigger a fresh post + image for the same topic, and ask you again.\n## 4. Turn On the Daily Schedule\n\nOnce testing looks good, activate the workflow (toggle it \"Active\" in n8n). It will then automatically run every day at 7:00 PM and pick up the next \"To Do\" row.\n\n5. Ongoing Use\nAdd new topics to the sheet anytime with Status = \"To Do.\"\nApprove or reject posts via Telegram as they come in.\nCheck the sheet's Status column to see what's been published.",
+        "height": 1520,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2928,
+        -112
+      ],
+      "id": "e67c7676-dfb7-4ae1-952d-39116a75aa07",
+      "name": "Sticky Note28"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Text AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Text For Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Prompt AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Prompt AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Image Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Generate Text AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Text AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Download Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Image1": {
+      "main": [
+        [
+          {
+            "node": "Switch6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Prompt AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text For Post": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Prompt AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Image Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {},
+  "nodeGroups": [],
+  "tags": []
+}

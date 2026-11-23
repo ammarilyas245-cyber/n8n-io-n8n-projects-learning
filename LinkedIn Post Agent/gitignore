@@ -1,0 +1,39 @@
+# Secrets & environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+token.json
+client_secret*.json
+
+# Raw, unsanitized n8n exports (may contain pinned personal data)
+*.raw.json
+*-original.json
+original.json
+exports/
+backups/
+
+
+# n8n local data
+.n8n/
+n8n_data/
+*.sqlite
+*.sqlite-journal
+
+# Node / Python
+node_modules/
+__pycache__/
+.venv/
+
+# Logs & OS / editor files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated images
+*.png
+*.jpg
