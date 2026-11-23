@@ -1,0 +1,82 @@
+# ============================================
+# Secrets and environment files
+# ============================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+secrets.json
+
+# ============================================
+# n8n credential exports and local data
+# (workflow .json files in workflows/ are intentionally NOT ignored)
+# ============================================
+credentials.json
+credentials-export*.json
+n8n-credentials*.json
+credentials/
+.n8n/
+n8n_data/
+n8n-data/
+local-files/
+
+# Raw / un-reviewed n8n exports (may contain keys, emails or pinned execution data).
+# Review and sanitise, then copy into workflows/
+raw-exports/
+unsanitized/
+*.raw.json
+
+# ============================================
+# Docker / self-hosting
+# ============================================
+docker-compose.override.yml
+postgres_data/
+redis_data/
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================
+# Backups and temporary files
+# ============================================
+backup/
+backups/
+*.bak
+*.backup
+*.tmp
+*.swp
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+npm-debug.log*
+
+# ============================================
+# Dependencies and build output
+# ============================================
+node_modules/
+dist/
+build/
+
+# ============================================
+# OS files and editors
+# ============================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+.vscode/
+.idea/
+*.code-workspace
+.claude/settings.local.json
+
+# ============================================
+# Private knowledge-base documents (company data used for the RAG index)
+# ============================================
+knowledge-base/
+*.pdf
