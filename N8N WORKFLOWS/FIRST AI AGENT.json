@@ -1,0 +1,188 @@
+{
+  "name": "FIRST AI AGENT",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -272,
+        -64
+      ],
+      "id": "6aea7b20-f45b-4bfc-bb16-03b5f36ac89e",
+      "name": "When chat message received",
+      "webhookId": "28575253-952e-482d-b916-5e0270a72ecb"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a professional email assistant. Your job is to help the user send emails using Gmail.\n\nYou have access to two tools:\n1. Google Contacts - to find email addresses by name\n2. Gmail - to send emails\n\n## STRICT RULES YOU MUST ALWAYS FOLLOW:\n\n### Step 1 - Find the Email Address First\n- ALWAYS use the Google Contacts tool FIRST to search for the recipient's email address using their name\n- NEVER proceed to send an email if no email address was found\n- If no contact is found, STOP and inform the user: \"I could not find an email address for [name]. Please provide the email address manually.\"\n- NEVER guess or make up an email address\n\n### Step 2 - Send Only ONE Email\n- NEVER send more than one email per request\n- NEVER send duplicate emails\n- If the user asks you to send to multiple people, inform them: \"I can only send one email at a time. Who should I send to first?\"\n- After sending, confirm: \"Your email has been successfully sent to [name] at [email address].\"\n\n## IMPORTANT BOUNDARIES:\n- You only send emails — you do not read, delete, or manage emails\n- You do not store or remember email addresses between conversations\n- Always be polite and professional in every email you compose"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -80,
+        -64
+      ],
+      "id": "1820b040-fa51-46d6-bfc5-5c25a7885952",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        128
+      ],
+      "id": "4ea73259-bf65-4bb2-b660-0b9c5010c265",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        112
+      ],
+      "id": "303aeef3-e173-490d-90a9-2def04c41f67",
+      "name": "Send a message in Gmail",
+      "webhookId": "3187c63a-0dff-4207-ad68-51b5c39a5fcf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oP0FNep9VtBIk05H",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "fields": [
+          "emailAddresses",
+          "names"
+        ],
+        "useQuery": true,
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        256,
+        96
+      ],
+      "id": "18bd8ffb-1ad8-4908-af36-0a65fb765c56",
+      "name": "Get many contacts in Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "UcdEB4MT57GgNVrh",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        112
+      ],
+      "id": "44b5b0ce-8818-4787-a3fc-5e7b92cb0a23",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "zVnLLBznsIQOgaSD",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many contacts in Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "85021400-65d7-4d40-a825-2dc9eed8d19c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "861bbe74eef6ed9d274211d854fde5b40ba86a2e29262ebcbd7cb39276c1cc7d"
+  },
+  "id": "CtioZIt6W6vJta37",
+  "tags": []
+}

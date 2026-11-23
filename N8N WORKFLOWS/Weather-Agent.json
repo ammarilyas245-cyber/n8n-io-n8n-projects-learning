@@ -1,0 +1,140 @@
+{
+  "name": "Weather Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "trigger-node",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [400, 300],
+      "webhookId": "weather-agent-webhook"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful weather and general knowledge assistant.\n\n## Your Capabilities\n- You can retrieve current weather for any city using the Get-Current-Weather-Tool\n- You can look up general information using Wikipedia\n\n## Instructions\n- When the user asks about weather, ALWAYS use the Get-Current-Weather-Tool\n- Extract the EXACT city name from the user message and pass it to the tool\n- Do NOT default to any city — always use the city the user mentioned\n- When the user asks general questions, use Wikipedia\n- Present weather results in a clean, friendly format with emojis\n- Be concise and helpful"
+        }
+      },
+      "id": "ai-agent-node",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "openai-model-node",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [580, 500]
+    },
+    {
+      "parameters": {
+        "topK": 3
+      },
+      "id": "wikipedia-node",
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [820, 500]
+    },
+    {
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "city": {
+              "type": "string",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('city', 'The exact city name to get weather for, extracted from the user message. Do not default to any city.', 'string') }}"
+            }
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "description": "Call this tool whenever the user asks about weather for any city. Extract the EXACT city name from the user's message and pass it as the city parameter. Do not default to any city."
+      },
+      "id": "call-weather-tool-node",
+      "name": "Call 'Get-Current-Weather-Tool'",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [1000, 500]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Get-Current-Weather-Tool'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

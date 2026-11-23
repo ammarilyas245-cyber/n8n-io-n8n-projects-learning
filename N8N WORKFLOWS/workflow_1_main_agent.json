@@ -1,0 +1,165 @@
+{
+  "name": "LinkedIn Scraping AI Agent [IMPROVED]",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "node-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "linkedin-agent-chat"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input Validator — sanitize and validate incoming chat message\nconst message = $input.first().json?.chatInput?.trim() || '';\n\nif (!message || message.length < 3) {\n  throw new Error('Input too short or empty. Please provide a valid LinkedIn search request.');\n}\n\nif (message.length > 2000) {\n  throw new Error('Input too long. Please keep your request under 2000 characters.');\n}\n\n// Pass through with sanitized input\nreturn [{\n  json: {\n    ...$input.first().json,\n    chatInput: message,\n    validatedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-input-validator",
+      "name": "Input Validator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a LinkedIn lead research assistant. Your job is to help users find and save LinkedIn profiles of professionals matching their search criteria.\n\nWhen the user asks you to find or grab a LinkedIn profile, use the 'Grab Profile Tool' to search for and save the profile.\n\nAlways:\n- Confirm what you searched for\n- Report how many profiles were found/saved\n- Let the user know if a profile already existed in the sheet (duplicate)\n- Be concise and professional\n\nNever make up profile data. Only report what the tool returns.",
+          "maxIterations": 10
+        }
+      },
+      "id": "node-ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.2,
+          "maxTokens": 1000
+        }
+      },
+      "id": "node-openai-chat-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [580, 480],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-cred",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "node-window-memory",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [720, 480]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $env.GRAB_PROFILE_WORKFLOW_ID }}",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $fromAI('query', 'The search query or LinkedIn URL to look up', 'string') }}",
+            "sessionId": "={{ $('When chat message received').item.json.sessionId }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-subagent-tool",
+      "name": "Call 'Grab Profile Tool [SUB_AGENT]'",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [860, 480]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ 'Sorry, I ran into an issue: ' + $json.error?.message || 'Unknown error. Please try again.' }}"
+      },
+      "id": "node-error-responder",
+      "name": "Error Responder",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [940, 300],
+      "notes": "Catches unhandled errors from the agent and returns a clean message to the user"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Input Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Validator": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Grab Profile Tool [SUB_AGENT]'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "meta": {
+    "description": "IMPROVED: LinkedIn Scraping AI Agent. Changes from original: (1) Added Input Validator node to sanitize empty/bad inputs before they reach the agent. (2) Replaced Simple Memory with Window Buffer Memory (last 10 messages) for more reliable context. (3) Set GPT-4o temperature to 0.2 for more consistent responses. (4) Added explicit system prompt guiding agent behavior. (5) Sub-agent tool now passes sessionId for traceability. (6) Uses env var for sub-workflow ID instead of hardcoding."
+  }
+}

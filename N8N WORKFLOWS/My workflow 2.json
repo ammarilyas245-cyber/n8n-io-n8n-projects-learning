@@ -1,0 +1,132 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -96
+      ],
+      "id": "3ee7c332-0c36-4668-b00d-43120f39142a",
+      "name": "WhatsApp Trigger",
+      "webhookId": "5912b864-a6a0-4639-b28e-e456a9cc452f",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "VmVgaQyKdp2e0A8z",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -112
+      ],
+      "id": "46206682-dc5e-4da1-a201-c65d3f6d2b35",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        80
+      ],
+      "id": "adb8a943-c6ac-4291-9c22-f1acc7651657",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "zVnLLBznsIQOgaSD",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1037812626084747",
+        "recipientPhoneNumber": "+923330943668",
+        "textBody": "hello we are testing whatsapp",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        -80
+      ],
+      "id": "8970eb29-a661-48df-aadf-d58e1343c690",
+      "name": "Send message",
+      "webhookId": "6a85ac99-63b9-4211-aca4-41787aa2d802",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "rhpyPgQ6MM4SyhLk",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "973da4d3-4954-4baf-85e5-4424eb19e39b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "861bbe74eef6ed9d274211d854fde5b40ba86a2e29262ebcbd7cb39276c1cc7d"
+  },
+  "id": "ZSBLIm3kGwnvUaDj",
+  "tags": []
+}

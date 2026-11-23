@@ -1,0 +1,307 @@
+{
+  "name": "PDF Generator {Generate bulk pdf from excel files}",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Franchise list upload",
+        "formDescription": "Upload files about your franchises in a file format",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Franchise Owners ",
+              "fieldType": "file",
+              "acceptFileTypes": ".xlsx"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -272,
+        -16
+      ],
+      "id": "e6170580-76fb-4f96-ae32-94ecce67ff44",
+      "name": "On form submission",
+      "webhookId": "65bc5982-3625-416a-b59f-25af6b7f5e19"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "Franchise_Owners_",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "f5ebf263-1199-4b3d-a640-0f1143677474",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "ec776ee7-277b-4ab9-8cb6-eb8dd0668459",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1-cjHGKGspg79D4YuAdB1-OjUGIGC7wnpQFtuqcuaIyc",
+          "mode": "list",
+          "cachedResultName": "Franchise Letter",
+          "cachedResultUrl": "https://docs.google.com/document/d/1-cjHGKGspg79D4YuAdB1-OjUGIGC7wnpQFtuqcuaIyc/edit?usp=drivesdk"
+        },
+        "name": "=Franchise_Letter_{{ $json.Franchise_name }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1yk3-kAtXwPZg1UX6j9wtx17o8SnRF9_D",
+          "mode": "list",
+          "cachedResultName": "Franchise Letter",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1yk3-kAtXwPZg1UX6j9wtx17o8SnRF9_D"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        464,
+        0
+      ],
+      "id": "d0e1c6bd-3cd9-41fb-98d8-0e6b8a9075c6",
+      "name": "Copy file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wreJV2etD3htp45O",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[Owner]",
+              "replaceText": "={{ $('Extract from File').item.json.Franchise_Owner }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Franchise]",
+              "replaceText": "={{ $('Extract from File').item.json.Franchise_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[City]",
+              "replaceText": "={{ $('Extract from File').item.json.City }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Fee]",
+              "replaceText": "={{ String($('Extract from File').item.json.Franchise_fee) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Date Today]",
+              "replaceText": "={{ $now.toFormat('dd/MM/yyyy') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "49cf0aac-62f6-4e76-a615-de1fbd52a57d",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "AIXlMLjQEReF8Ofu",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "drawingsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "Franchise Letter"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        0
+      ],
+      "id": "55c24283-d223-4caa-8be0-4c91dd57faa8",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wreJV2etD3htp45O",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Copy file').item.json.name }}.pdf",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1yk3-kAtXwPZg1UX6j9wtx17o8SnRF9_D",
+          "mode": "list",
+          "cachedResultName": "Franchise Letter",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1yk3-kAtXwPZg1UX6j9wtx17o8SnRF9_D"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "be5cd835-3573-4181-a019-536c067eb7e5",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wreJV2etD3htp45O",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "243f8cc4-4ae4-4a6a-8829-20c191578e93",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "725ae5e172354ebe66e6e84d47c0e5b443425c330480771a5ce5cd9952792f55"
+  },
+  "id": "rKt8MjnCiNgJMKPh",
+  "tags": []
+}

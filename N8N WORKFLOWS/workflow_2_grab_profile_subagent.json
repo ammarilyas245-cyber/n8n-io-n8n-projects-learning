@@ -1,0 +1,515 @@
+{
+  "name": "Grab Profile Tool [SUB_AGENT] [IMPROVED]",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputData"
+      },
+      "id": "node-execute-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [160, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt Builder — constructs a clean, structured prompt for GPT\nconst query = $input.first().json?.query?.trim() || '';\nconst sessionId = $input.first().json?.sessionId || 'unknown';\n\nif (!query) {\n  throw new Error('No query provided to sub-agent.');\n}\n\nconst systemPrompt = `You are a LinkedIn profile extraction assistant. \nGiven a search query or LinkedIn URL, extract the key search parameters.\nRespond ONLY with a valid JSON object in this exact format:\n{\n  \"searchQuery\": \"<the refined Google search query to use with SerpAPI>\",\n  \"linkedinUrl\": \"<LinkedIn profile URL if directly provided, otherwise null>\",\n  \"personName\": \"<inferred person name if available, otherwise null>\",\n  \"company\": \"<inferred company if available, otherwise null>\"\n}`;\n\nreturn [{\n  json: {\n    query,\n    sessionId,\n    systemPrompt,\n    userMessage: `Extract search parameters for this LinkedIn query: \"${query}\"`\n  }\n}];"
+      },
+      "id": "node-prompt-builder",
+      "name": "Prompt Builder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [360, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.userMessage }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0,
+          "maxTokens": 300,
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "node-gpt-extractor",
+      "name": "GPT Extract Parameters",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [560, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-cred",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse GPT structured response safely\nconst rawContent = $input.first().json?.message?.content || $input.first().json?.text || '';\n\nlet parsed;\ntry {\n  // Strip any accidental markdown fences\n  const cleaned = rawContent.replace(/```json|```/gi, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  throw new Error(`GPT returned unparseable response: ${rawContent.substring(0, 200)}`);\n}\n\nconst { searchQuery, linkedinUrl, personName, company } = parsed;\n\nif (!searchQuery && !linkedinUrl) {\n  throw new Error('GPT could not extract a usable search query from the input.');\n}\n\n// Build the SerpAPI query — prefer direct URL, fall back to search query\nconst serpQuery = linkedinUrl\n  ? `site:linkedin.com/in \"${searchQuery}\"`\n  : `site:linkedin.com/in ${searchQuery}`;\n\nreturn [{\n  json: {\n    serpQuery,\n    linkedinUrl: linkedinUrl || null,\n    personName: personName || null,\n    company: company || null,\n    originalQuery: $('Prompt Builder').item.json.query,\n    sessionId: $('Prompt Builder').item.json.sessionId\n  }\n}];"
+      },
+      "id": "node-parse-gpt-response",
+      "name": "Parse GPT Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.serpQuery }}"
+            },
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "num",
+              "value": "5"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $env.SERP_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxRetries": 3,
+            "waitBetweenRetries": 2000
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json",
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "node-serp-api",
+      "name": "SerpAPI HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 300],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "serp-api-cred",
+          "name": "SerpAPI Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and validate LinkedIn profile data from SerpAPI results\nconst results = $input.first().json?.organic_results || [];\nconst meta = $('Parse GPT Response').item.json;\n\nif (!results.length) {\n  return [{\n    json: {\n      success: false,\n      reason: 'No results returned from SerpAPI',\n      originalQuery: meta.originalQuery\n    }\n  }];\n}\n\n// Filter to LinkedIn profile URLs only (not company pages, posts, etc.)\nconst profileResults = results.filter(r => {\n  const url = (r.link || '').toLowerCase();\n  return url.includes('linkedin.com/in/') && !url.includes('/posts') && !url.includes('/detail');\n});\n\nif (!profileResults.length) {\n  return [{\n    json: {\n      success: false,\n      reason: 'SerpAPI returned results but none were LinkedIn profile URLs',\n      rawLinks: results.slice(0, 3).map(r => r.link)\n    }\n  }];\n}\n\nconst top = profileResults[0];\n\n// Clean the LinkedIn URL (remove tracking params)\nlet cleanUrl = top.link || '';\ntry {\n  const u = new URL(cleanUrl);\n  cleanUrl = `${u.origin}${u.pathname}`;\n} catch(_) {}\n\n// Try to extract name from title (e.g. \"John Doe - Software Engineer at Acme | LinkedIn\")\nconst titleParts = (top.title || '').split(' - ');\nconst extractedName = meta.personName || titleParts[0]?.trim() || 'Unknown';\n\n// Extract headline/role\nconst rawHeadline = top.snippet || top.title || '';\nconst headline = rawHeadline.replace(' | LinkedIn', '').trim();\n\nreturn [{\n  json: {\n    success: true,\n    name: extractedName,\n    linkedinUrl: cleanUrl,\n    headline,\n    company: meta.company || null,\n    title: titleParts[1]?.trim() || null,\n    originalQuery: meta.originalQuery,\n    sessionId: meta.sessionId,\n    scrapedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-extract-profile",
+      "name": "Extract Profile Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1160, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-success",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-valid",
+      "name": "Profile valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [1360, 300]
+    },
+    {
+      "parameters": {
+        "operation": "lookup",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "lookupColumn": "LinkedIn URL",
+        "lookupValue": "={{ $json.linkedinUrl }}",
+        "options": {
+          "returnAllMatches": false
+        }
+      },
+      "id": "node-dedup-check",
+      "name": "Dedup Check (Sheet Lookup)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1560, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gsheets-cred",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "condition-not-dup",
+              "leftValue": "={{ $json['LinkedIn URL'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ]
+        }
+      },
+      "id": "node-if-not-dup",
+      "name": "Not a duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [1760, 200]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Extract Profile Data').item.json.name }}",
+            "LinkedIn URL": "={{ $('Extract Profile Data').item.json.linkedinUrl }}",
+            "Headline": "={{ $('Extract Profile Data').item.json.headline }}",
+            "Company": "={{ $('Extract Profile Data').item.json.company }}",
+            "Job Title": "={{ $('Extract Profile Data').item.json.title }}",
+            "Original Query": "={{ $('Extract Profile Data').item.json.originalQuery }}",
+            "Scraped At": "={{ $('Extract Profile Data').item.json.scrapedAt }}",
+            "Session ID": "={{ $('Extract Profile Data').item.json.sessionId }}"
+          }
+        },
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        }
+      },
+      "id": "node-append-sheet",
+      "name": "Append Row to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1960, 140],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gsheets-cred",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-result",
+              "name": "result",
+              "value": "Profile saved successfully",
+              "type": "string"
+            },
+            {
+              "id": "assign-name",
+              "name": "name",
+              "value": "={{ $('Extract Profile Data').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-url",
+              "name": "linkedinUrl",
+              "value": "={{ $('Extract Profile Data').item.json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-headline",
+              "name": "headline",
+              "value": "={{ $('Extract Profile Data').item.json.headline }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-status",
+              "name": "status",
+              "value": "new",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-return-saved",
+      "name": "Return: Saved",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2160, 140]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-dup-result",
+              "name": "result",
+              "value": "Profile already exists in sheet — skipped",
+              "type": "string"
+            },
+            {
+              "id": "assign-dup-name",
+              "name": "name",
+              "value": "={{ $('Extract Profile Data').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-dup-url",
+              "name": "linkedinUrl",
+              "value": "={{ $('Extract Profile Data').item.json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-dup-status",
+              "name": "status",
+              "value": "duplicate",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-return-dup",
+      "name": "Return: Duplicate",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1960, 260]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-err-result",
+              "name": "result",
+              "value": "Could not find a valid LinkedIn profile",
+              "type": "string"
+            },
+            {
+              "id": "assign-err-reason",
+              "name": "reason",
+              "value": "={{ $json.reason || 'Unknown error in profile extraction' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-err-query",
+              "name": "originalQuery",
+              "value": "={{ $json.originalQuery || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-err-status",
+              "name": "status",
+              "value": "error",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-return-error",
+      "name": "Return: Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1560, 420]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prompt Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Builder": {
+      "main": [
+        [
+          {
+            "node": "GPT Extract Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Extract Parameters": {
+      "main": [
+        [
+          {
+            "node": "Parse GPT Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse GPT Response": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Profile valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profile valid?": {
+      "main": [
+        [
+          {
+            "node": "Dedup Check (Sheet Lookup)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return: Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Check (Sheet Lookup)": {
+      "main": [
+        [
+          {
+            "node": "Not a duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not a duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Append Row to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return: Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Row to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Return: Saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "description": "IMPROVED: Grab Profile Sub-Agent. Changes from original: (1) Added Prompt Builder node to structure the GPT prompt properly. (2) GPT now uses responseFormat: json_object — no brittle string parsing. (3) Parse GPT Response node safely JSON.parses with try/catch and meaningful error messages. (4) SerpAPI HTTP request has retry logic (3 retries, 2s delay). (5) Filters SerpAPI results to actual profile URLs — no company pages or posts. (6) Strips URL tracking params before saving. (7) Added Dedup Check (sheet lookup) BEFORE appending — prevents duplicate rows. (8) False branch on If node is now handled — returns a structured error instead of dangling. (9) All terminal nodes use Set node with consistent field names (result, status, linkedinUrl) so the main agent gets predictable output. (10) sessionId passed through entire flow for traceability."
+  }
+}

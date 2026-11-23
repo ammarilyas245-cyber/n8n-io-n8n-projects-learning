@@ -1,0 +1,88 @@
+{
+  "name": "Get-Current-Weather-Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputData",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "city",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "execute-workflow-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "currentWeather",
+        "cityName": "={{ $json.city }}",
+        "options": {
+          "units": "imperial",
+          "language": "en"
+        }
+      },
+      "id": "openweathermap-node",
+      "name": "OpenWeatherMap",
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"city\": \"{{ $json.name }}\",\n  \"country\": \"{{ $json.sys.country }}\",\n  \"temperature_f\": {{ $json.main.temp }},\n  \"feels_like_f\": {{ $json.main.feels_like }},\n  \"temp_min_f\": {{ $json.main.temp_min }},\n  \"temp_max_f\": {{ $json.main.temp_max }},\n  \"humidity_percent\": {{ $json.main.humidity }},\n  \"wind_speed_mph\": {{ $json.wind.speed }},\n  \"weather\": \"{{ $json.weather[0].main }}\",\n  \"description\": \"{{ $json.weather[0].description }}\"\n}",
+        "options": {}
+      },
+      "id": "respond-node",
+      "name": "Return Weather Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Return Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}
