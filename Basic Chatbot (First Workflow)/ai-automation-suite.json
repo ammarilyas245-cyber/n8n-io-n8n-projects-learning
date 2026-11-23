@@ -1,0 +1,2073 @@
+{
+  "name": "AI Automation Suite (Chatbots, Agents, RAG, Onboarding, Slack)",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAllPeople"
+      },
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        -4336,
+        -480
+      ],
+      "id": "462e7df0-c8dc-4b9a-a16b-f991ded5a4a3",
+      "name": "Customer Datastore (n8n training)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0e832ad-75e8-4575-bba6-c091e1120035",
+              "name": "Name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "1c3f4ee4-331e-4f8d-9356-0c27b042a574",
+              "name": "Email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "ae4be946-aecb-4283-af77-a434e5852533",
+              "name": "Country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4112,
+        -480
+      ],
+      "id": "262cb6e2-ab82-41a4-8ad2-9ca63c0eb44c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cc2b9fa8-7071-4d3d-b6db-0bdfc8f66449",
+              "leftValue": "={{ $json.Country }}",
+              "rightValue": "US",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3888,
+        -480
+      ],
+      "id": "e3863250-f412-4919-a653-d2bed0c9fa49",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1328,
+        -320
+      ],
+      "id": "37c0aee1-9bc1-4697-96f6-f932149cb99e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -3360,
+        -464
+      ],
+      "id": "26106c7c-82ca-4400-8d9a-825ceca50dff",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.7,
+      "position": [
+        -3056,
+        -464
+      ],
+      "id": "11d43006-e0be-4070-8e6b-fe907708c1ac",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        -2128,
+        -480
+      ],
+      "id": "5cd9944d-6fc5-40ea-940c-8995389abd26",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        -2448,
+        -464
+      ],
+      "id": "9b14030b-897d-4cdb-a334-5b80b28c00e6",
+      "name": "Summarization Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -2736,
+        -464
+      ],
+      "id": "7db02dbd-b3f6-4429-9aeb-1bf9e975e5db",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\n#Tool\n- SerpApi : Always use this tool to fetch real time data to before answering any question"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1328,
+        -720
+      ],
+      "id": "e7173a18-d1c5-446c-8ed0-c918bb664f5f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8965c8e3-fab3-4802-ac70-c1d3baa71815",
+              "leftValue": "={{ $json.chatInput }}",
+              "rightValue": "[agent]",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1616,
+        -464
+      ],
+      "id": "84ba0deb-9a93-43be-979a-a321bf81e96b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        -496
+      ],
+      "id": "a4ceceb1-a2d8-42e0-aa95-33befb3d1bda",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -1264,
+        -496
+      ],
+      "id": "fe07019e-8ecf-408c-b0b8-508379614085",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -496
+      ],
+      "id": "f1ef00ec-aed5-4662-81c4-46e552c684bf",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\n#Tool\n- SerpApi : Always use this tool to fetch real time data to before answering any question"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -752,
+        -656
+      ],
+      "id": "6a40776e-a4d2-41a5-9b1a-65ceda745deb",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -816,
+        -432
+      ],
+      "id": "7d96ee12-7c21-42f9-a788-3a4446d71727",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -688,
+        -432
+      ],
+      "id": "13440eed-5991-4500-82f1-fa25e3fb7794",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -432
+      ],
+      "id": "2fa6df22-bdef-4c63-94b8-8722e15c37ea",
+      "name": "Google search in SerpApi1",
+      "credentials": {
+        "serpApi": {
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\n#Tool\n- OpenWeather : Always use this tool to fetch real time weather of the city mentioned in the chat input"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -688
+      ],
+      "id": "8eba4bb8-6494-4de1-90e3-9d21c74c4f86",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -416
+      ],
+      "id": "a21a93cb-e412-4023-9f29-2c681067325b",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -48,
+        -416
+      ],
+      "id": "8f3c7949-d8da-4681-b2f7-50f010108bc6",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        -448
+      ],
+      "id": "ab5625f8-a1a5-4168-938f-52700164e543",
+      "name": "Send a message in Gmail",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -448
+      ],
+      "id": "623a73d6-e6a2-49f2-bcac-79553103e82e",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\n#Tools\n\n- Weather : When you call the Weather tool, return its output to the user exactly as received. Do not summarize, rephrase, reformat, or add commentary. Output the tool's response verbatim, word for word.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        -688
+      ],
+      "id": "15e4caef-d178-4070-9f94-4f1c5a2680f8",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        -448
+      ],
+      "id": "87c6a7a5-7160-43d8-8fe0-fb8832bed583",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        -448
+      ],
+      "id": "67dde3bb-caf5-46f2-8bbc-ee89268805eb",
+      "name": "Send a message in Gmail1",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to get the Response back about the weather",
+        "workflowId": {
+          "__rl": true,
+          "value": "YOUR_WEATHER_CHILD_WORKFLOW_ID",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        -432
+      ],
+      "id": "17604132-bdb6-4c8b-88bc-df416c413003",
+      "name": "Weather"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        816,
+        -432
+      ],
+      "id": "33e4a4b5-f19b-4fe9-ad8e-f2dd29a9cf09",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "formTitle": "Welcome to our AI TECH company's onboarding system",
+        "formDescription": "Kindly fill these below information to get started with Our Company",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Nmae",
+              "placeholder": "John Abraham",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "client@example.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company name",
+              "placeholder": "Eg: Maxwell",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Industry",
+              "placeholder": "Eg: IT Industry",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Services Required",
+              "placeholder": "Eg: Marketing"
+            },
+            {
+              "fieldLabel": "Starting Date",
+              "fieldType": "date",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        1600,
+        -624
+      ],
+      "id": "61b055cd-af0c-4bd9-8afd-d1e31cd622dd",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05fc966f-57fa-4bbf-80fa-0d6c277e49de",
+              "name": "Full Name",
+              "value": "={{ $json['Full Nmae'] }}",
+              "type": "string"
+            },
+            {
+              "id": "3107adc0-7e88-4ca9-a2b6-95e8d7607b7c",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "3b282234-1a5e-4ceb-af61-9589b14e2744",
+              "name": "Company name",
+              "value": "={{ $json['Company name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2399c5ee-c390-4b62-88d6-b0b5f947b4ed",
+              "name": "Industry",
+              "value": "={{ $json.Industry }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b60fd3-87af-4bf1-9032-3577790466f2",
+              "name": "Services Required",
+              "value": "={{ $json['Services Required'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d5d432fa-3a43-426f-bd8b-586b76b7d8b5",
+              "name": "Starting Date",
+              "value": "={{ $json['Starting Date'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1872,
+        -624
+      ],
+      "id": "d5458280-94e3-4276-a3dc-9386be17be3b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Parse the json output and output the parameters seprately\n\nSubject :\nBody:"
+            },
+            {
+              "content": "={{ $json.output }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  },\n  \"additionalProperties\": false,\n  \"required\": [\"subject\", \"body\"]\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        2560,
+        -768
+      ],
+      "id": "e0d0e68c-bc90-4a03-9d08-aa348091cff1",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields1').item.json.Email }}",
+        "subject": "={{ $json.output[0].content[0].text.subject }}",
+        "message": "={{ $json.output[0].content[0].text.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2976,
+        -880
+      ],
+      "id": "885fedad-f6a2-408d-9469-905c334769d6",
+      "name": "Send a message",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields1').item.json.Email }}",
+        "subject": "={{ $json.output[0].content[0].text.subject }}",
+        "message": "={{ $json.output[0].content[0].text.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2976,
+        -480
+      ],
+      "id": "4b760786-6365-4225-8a04-7b2e1d25a361",
+      "name": "Send a message1",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        -320
+      ],
+      "id": "a86230a5-2693-4d1c-92d3-fc7cf121fbcb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Client Onboarding System",
+        "height": 784,
+        "width": 1856,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        -944
+      ],
+      "id": "1167cec3-a4b6-40c9-8b38-c3e655e8f09b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "#  Weather Agent",
+        "height": 784,
+        "width": 1744,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -944
+      ],
+      "id": "ceb0ecb9-5651-4009-b79b-51ff2379c213",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "#  Search Agent",
+        "height": 784,
+        "width": 560,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        -944
+      ],
+      "id": "886b626b-04b6-4898-badb-553376189dc2",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "#  Wikipedia Agent",
+        "height": 784,
+        "width": 688,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -928
+      ],
+      "id": "231d31b6-a2a0-45c2-a11b-3b1c092c4fb7",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kindly generate a warm and professional welcome email for a new client using the following details:\n\nFull Name: {{ $('Edit Fields1').item.json['Full Name'] }}\nEmail: {{ $('Edit Fields1').item.json['Email'] }}\nCompany Name: {{ $('Edit Fields1').item.json['Company name'] }}\nIndustry: {{ $('Edit Fields1').item.json['Industry'] }}\nServices Required: {{ $('Edit Fields1').item.json['Services Required'] }}\nStarting Date: {{ $('Edit Fields1').item.json['Starting Date'] }}\n\nThe email should:\n- Greet them by name and welcome them on behalf of AI Tech\n- Mention their company name and the service they have signed up for\n- Reference their starting date\n- Inform them that they will be receiving a separate Terms & Conditions email which will need to be either signed or replied to in order to confirm their agreement before work begins\n- Keep the tone friendly, professional, and concise\n\nSign off the email with:\nName: Ilyas\nEmail: sender@example.com\nCompany: AI Tech",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2144,
+        -880
+      ],
+      "id": "4acfe65a-cf3e-4c0f-81f5-bc8f19779cdf",
+      "name": "Welcome AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw output text from the AI Agent\nconst text = $input.first().json.output;\n\n// Normalize escaped newlines just in case\nconst normalized = text.replace(/\\\\n/g, '\\n');\n\n// Extract subject line - text after \"Subject:\" until end of that line\nconst subjectMatch = normalized.match(/Subject:\\s*(.+)/i);\nconst subject = subjectMatch ? subjectMatch[1].trim() : '';\n\n// Extract body - everything after the first blank line following the subject\nconst bodyMatch = normalized.match(/Subject:.+?\\n+(.+[\\s\\S]*)/i);\nconst body = bodyMatch ? bodyMatch[1].trim() : normalized;\n\nreturn [{ json: { subject, body } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2608,
+        -944
+      ],
+      "id": "d0a9827a-91e2-4db6-9867-8f4cc0de1b82",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a formal Terms and Conditions email for a new client using the details below:\n\nFull Name: {{ $('Edit Fields1').item.json['Full Name'] }}\nEmail: {{ $('Edit Fields1').item.json['Email'] }}\nCompany Name: {{ $('Edit Fields1').item.json['Company name'] }}\nIndustry: {{ $('Edit Fields1').item.json['Industry'] }}\nServices Required: {{ $('Edit Fields1').item.json['Services Required'] }}\nStarting Date: {{ $('Edit Fields1').item.json['Starting Date'] }}\n\nThe document must include the following sections in order:\n\n1. INTRODUCTION\n   - A brief professional introduction addressed to the client by name\n   - State that this document outlines the agreement between AI Tech and {{ $('Edit Fields1').item.json['Company name'] }}\n   - Mention that this must be signed or replied to with acceptance before work begins\n\n2. PURPOSE OF CONTRACT\n   - Clearly state the purpose of the engagement between AI Tech and the client\n   - Reference the specific service: {{ $('Edit Fields1').item.json['Services Required'] }}\n\n3. SCOPE OF SERVICES\n   - Detail what AI Tech will deliver under {{ $('Edit Fields1').item.json['Services Required'] }}\n   - Include that any work outside the agreed scope will require a separate written agreement\n\n4. PAYMENT TERMS\n   - State that payment terms will be agreed upon separately\n   - Include that late payments beyond 7 days may result in a pause of services\n   - Mention that all fees are non-refundable once work has commenced\n\n5. LIABILITY CLAUSE\n   - AI Tech is not liable for any indirect, incidental, or consequential damages\n   - The client is responsible for providing accurate information required for service delivery\n   - AI Tech reserves the right to terminate the agreement if terms are violated\n\n6. SIGNATURE SECTION\n   - A section for the client to sign or reply confirming acceptance\n   - Include fields for: Client Name, Company, Date, Signature\n   - Also include AI Tech's pre-filled sign-off:\n     Authorized by: Ilyas\n     Email: sender@example.com\n     Company: AI Tech\n     Date: {{ $('Edit Fields1').item.json['Starting Date'] }}\n\nKeep the tone formal and professional. Format it clearly with bold section headings.\nReturn the output as:\n- subject: the email subject line only\n- body: the full terms and conditions email body",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2176,
+        -480
+      ],
+      "id": "85da3835-4fee-40f6-8958-6b19a1257abf",
+      "name": "Terms and Condition AI Agent"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Parse the json output and output the parameters seprately\n\nSubject :\nBody:"
+            },
+            {
+              "content": "={{ $json.output }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  },\n  \"additionalProperties\": false,\n  \"required\": [\"subject\", \"body\"]\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        2560,
+        -368
+      ],
+      "id": "1d386637-cb2f-4f2d-b9bf-82971032bd96",
+      "name": "Message a model2",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// output is a plain string from T&C Agent\nconst raw = $input.first().json.output;\n\n// Extract subject - text after \"subject:\" until newline\nconst subjectMatch = raw.match(/subject:\\s*(.+?)(?:\\\\n|\\n)/i);\nconst subject = subjectMatch ? subjectMatch[1].trim() : '';\n\n// Extract body - everything after \"body:\"\nconst bodyMatch = raw.match(/body:\\s*([\\s\\S]+)/i);\nlet body = bodyMatch ? bodyMatch[1].trim() : raw;\n\n// Convert newlines to HTML breaks\nbody = body.replace(/\\\\n/g, '<br>').replace(/\\n/g, '<br>');\n\n// Signature fields on separate lines\nbody = body.replace(/(Client Name:)/gi, '<br><br><strong>$1</strong> ___________________________<br>');\nbody = body.replace(/(Signature:)/gi, '<br><strong>$1</strong> ___________________________<br>');\nbody = body.replace(/(Company:)\\s*_{2,}/gi, '<br><strong>Company:</strong> ___________________________<br>');\nbody = body.replace(/(Date:)\\s*_{2,}/gi, '<br><strong>Date:</strong> ___________________________<br>');\n\n// Owner sign-off on separate lines\nbody = body.replace(/(Authorized by:)/gi, '<br><br><strong>$1</strong><br>');\nbody = body.replace(/(ilyasammar980@gmail\\.com)/gi, '<br>$1<br>');\nbody = body.replace(/(AI Tech Team|AI Tech)/gi, '<br>$1<br>');\n\n// Best regards\nbody = body.replace(/(Best regards,?)/gi, '<br><br><strong>$1</strong><br>');\n\nreturn [{ json: { subject, body } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        -528
+      ],
+      "id": "e28a05ad-88ac-4042-a15c-928057629a6b",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "# RAG Pipeline Chatbot",
+        "height": 1248,
+        "width": 2576,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        -1072
+      ],
+      "id": "4c1cc9f8-6747-4820-979f-90602f463840",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FILE_ID",
+          "mode": "list",
+          "cachedResultName": "14_Recipes_Cookbook.pdf"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3872,
+        -96
+      ],
+      "id": "29fee03f-7074-4a2b-9c55-d97cf7543880",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "14-recipes-rag-agent",
+          "mode": "list",
+          "cachedResultName": "14-recipes-rag-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        4224,
+        -208
+      ],
+      "id": "71fda3d0-f359-4798-8ad7-00c71f70d4d1",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3936,
+        -272
+      ],
+      "id": "94b8032f-5aa7-45b9-87b2-e1428effcff3",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        4256,
+        32
+      ],
+      "id": "22de9dab-4d52-41d2-b3f5-71dbc22aacd1",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemPromptTemplate": "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question.\nIf you don't know the answer, just say that you don't know, don't try to make up an answer.\n----------------\nContext: {context}\n\nFormat your entire response as clean, simple HTML using <p>, <ul>, <li>, <strong>, and <h3> tags only — no markdown, no backticks, no plain text."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.7,
+      "position": [
+        3760,
+        -912
+      ],
+      "id": "69cf3ed9-6b6c-4500-8afc-ad155db2ad45",
+      "name": "Question and Answer Chain1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        3856,
+        -688
+      ],
+      "id": "0cbc71fc-2b3f-443f-8892-6588eb60ba8f",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "14-recipes-rag-agent",
+          "mode": "list",
+          "cachedResultName": "14-recipes-rag-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        3856,
+        -480
+      ],
+      "id": "dbb8a14f-394d-452d-b707-7aa12176986f",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3680,
+        -704
+      ],
+      "id": "90d8dee9-103a-4036-ac76-12750e27d16a",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4656,
+        -416
+      ],
+      "id": "8030e0f0-bcf3-4e98-8008-ac011d5fbbcb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FILE_ID",
+          "mode": "list",
+          "cachedResultName": "14_Recipes_Cookbook.pdf"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5024,
+        -416
+      ],
+      "id": "192df68b-0b77-472e-bedc-e9d8252bfb1e",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "14-recipes-rag-agent",
+          "mode": "list",
+          "cachedResultName": "14-recipes-rag-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        5392,
+        -416
+      ],
+      "id": "e571ddc1-07ba-4fab-b996-6c398ff89999",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        5088,
+        -592
+      ],
+      "id": "8e208248-9934-47f0-ae61-5b73056635cb",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        5376,
+        -192
+      ],
+      "id": "850cc628-d27a-4390-8f26-9fbf88cc76c3",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        5456,
+        16
+      ],
+      "id": "f9f04206-4bfc-48fc-a931-2c708a51db61",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        4592,
+        -1024
+      ],
+      "id": "4c44abe6-4c7f-410b-bf8f-c8ed7a1bec23",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Recipes Assistant with access to a knowledge base of 14 specific recipes. Your job is to answer questions ONLY using the information retrieved from the vector store tool connected to you.\n\nSTRICT RULES:\n- You MUST always use the Pinecone vector store tool to search for information before answering any recipe-related question.\n- NEVER use your own general knowledge about recipes, cooking, or ingredients. Only answer based on what the vector store returns.\n- If the vector store does not return relevant information for a query, respond with: \"I'm sorry, I don't have information about that in my recipe knowledge base. Try asking about one of the available recipes.\"\n- Do NOT improvise, suggest alternatives, or fill in missing details from your own training knowledge.\n\nWHAT YOU CAN HELP WITH:\n- Listing ingredients for any of the 14 recipes in the knowledge base\n- Explaining the step-by-step method for making any recipe\n- Answering specific questions about a recipe (e.g., \"How much flour does the bread recipe need?\")\n\nWHAT YOU MUST REFUSE:\n- Questions about recipes not found in the vector store\n- General cooking advice not tied to the specific retrieved content\n- Modifying or substituting ingredients unless that information is in the retrieved context\n\nAlways be friendly, clear, and precise when presenting recipe information."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4896,
+        -1040
+      ],
+      "id": "e0fb5f5a-2ccb-426a-ae93-0fe042c2c936",
+      "name": "AI Agent4"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        4880,
+        -800
+      ],
+      "id": "ac462986-c24d-4827-a360-f44bf108d168",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to retrieve information about recipes from the knowledge base. \nAlways call this tool when the user asks about any recipe, including its \ningredients, quantities, preparation steps, cooking methods, or any other \nrecipe-related details. This tool contains data for 14 specific recipes. \nNever answer recipe questions without calling this tool first.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "14-recipes-rag-agent",
+          "mode": "list",
+          "cachedResultName": "14-recipes-rag-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        5008,
+        -800
+      ],
+      "id": "3793ce75-b121-4722-93db-55d33d31941b",
+      "name": "Pinecone Vector Store3",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Slack Chatbot\n=========",
+        "height": 912,
+        "width": 2000,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6112,
+        -1072
+      ],
+      "id": "bc4394a1-9b61-4e98-85b9-a01040e510e8",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "any_event",
+          "app_mention"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "list",
+          "cachedResultName": "your-slack-channel"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        6496,
+        -800
+      ],
+      "id": "81fab3e0-ff85-4a4d-9655-e33ba1c08b07",
+      "name": "Slack Trigger",
+      "credentials": {
+        "slackApi": {
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "list",
+          "cachedResultName": "your-slack-channel"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        7440,
+        -800
+      ],
+      "id": "ba25d707-67dc-493a-8377-67f1d84a2933",
+      "name": "Send a message2",
+      "credentials": {
+        "slackApi": {
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.blocks[0].elements[0].elements[0].text }}",
+        "options": {
+          "systemMessage": "=You are an intelligent assistant integrated into Slack, built to help users with a wide range of questions and tasks. You are helpful, concise, and accurate. Always respond in a friendly but professional tone appropriate for a team Slack environment. Keep responses clear and well-structured — use bullet points or short paragraphs when it improves readability, but avoid being overly verbose.\n\n---\n\n## ROLE\n\nYou are a multi-tool AI assistant capable of answering questions from internal knowledge, real-time web data, weather conditions, and encyclopedia-level information. Your job is to understand what the user is asking, select the right tool for the job, and return a useful, accurate response.\n\n---\n\n## TOOLS AND WHEN TO USE THEM\n\nYou have access to the following tools. Use ONLY the most relevant tool for each query. Do not combine tools unnecessarily or use them simultaneously unless the user explicitly requests information from multiple sources.\n\n### 1. Pinecone Vector Store\nUse this tool when the user asks about topics that may be covered in your internal knowledge base (e.g., stored documents, recipes, company data, or any content that has been indexed).\n- Trigger words: \"what do you know about\", \"from your knowledge\", \"in your database\", \"do you have info on\", or any question that relates to internally stored content.\n- Always query this first if the topic could reasonably exist in the knowledge base before reaching out to external sources.\n\n### 2. Wikipedia\nUse this tool ONLY when the user explicitly asks about a Wikipedia article, a well-known concept, a historical event, a person, a place, or an encyclopedic topic.\n- Trigger words: \"Wikipedia\", \"what is\", \"who is\", \"tell me about [person/place/concept]\", \"history of\", \"definition of\", \"explain [topic]\".\n- DO NOT use this tool for current news, live data, prices, or anything time-sensitive.\n- DO NOT use this tool when the user says \"search the web\", \"Google this\", or \"find online\".\n\n### 3. SerpApi (Google Search)\nUse this tool ONLY when the user explicitly wants a web search or asks for current, real-time, or recent information from the internet.\n- Trigger words: \"search the web\", \"Google\", \"look it up online\", \"find me the latest\", \"current news on\", \"what's happening with\", \"recent updates on\".\n- DO NOT use this tool for encyclopedic or conceptual questions that Wikipedia can answer.\n- DO NOT use this tool and Wikipedia at the same time. Choose one based on the user's intent.\n\n### 4. Weather (Child Workflow)\nUse this tool when the user asks about weather conditions, forecasts, \nor temperature for any location.\n- Trigger words: \"weather\", \"forecast\", \"temperature\", \"will it rain\", \n  \"is it hot/cold in\", \"what's the weather like\".\n- Always ask for the location if it is not provided.\n- IMPORTANT: When this tool returns a response, forward it to the user \n  EXACTLY as received — word for word, emojis included. Do NOT \n  rephrase, summarize, or reformat the weather tool's output in any way.\n\n---\n\n## TOOL SELECTION RULES — CRITICAL\n\n- Wikipedia vs. Google Search: These are NEVER used together for the same query.\n  - If the user says \"search Wikipedia\" or asks about a factual/encyclopedic topic → use Wikipedia only.\n  - If the user says \"Google this\", \"search the web\", or asks for live/recent info → use SerpApi only.\n  - When in doubt about which to use, ask the user: \"Should I look this up on Wikipedia or search the web?\"\n\n- Internal Knowledge First: Always check Pinecone first if the question might relate to stored knowledge before going external.\n\n- Weather is standalone: Never mix the weather tool with search tools in the same response unless the user is asking two separate questions.\n\n---\n\n## BEHAVIOR GUIDELINES\n\n- Be concise. Slack is a messaging platform — avoid long walls of text unless the user asks for detail.\n- Format responses cleanly. Use bullet points, bold headers, or numbered lists when listing information.\n- If a tool returns no results, say so clearly and suggest an alternative (e.g., \"I didn't find that in my knowledge base — want me to search the web instead?\").\n- Never fabricate information. If you don't know something and no tool returns a"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        6928,
+        -800
+      ],
+      "id": "e1260b3a-e531-404d-9d2d-5df9c0a8609c",
+      "name": "AI Agent5"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        6448,
+        -576
+      ],
+      "id": "2e158b08-5507-4cb3-be01-6ef9366f7d0f",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Slack Trigger').item.json.user }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        6640,
+        -528
+      ],
+      "id": "832bf3e6-47bb-4864-b0df-00f3998282fb",
+      "name": "Simple Memory4"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to retrieve information about recipes from the knowledge base. \nAlways call this tool when the user asks about any recipe, including its \ningredients, quantities, preparation steps, cooking methods, or any other \nrecipe-related details. This tool contains data for 14 specific recipes. \nNever answer recipe questions without calling this tool first.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "14-recipes-rag-agent",
+          "mode": "list",
+          "cachedResultName": "14-recipes-rag-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        7024,
+        -480
+      ],
+      "id": "68a56f21-ec62-476d-9e16-395d23ab41bb",
+      "name": "Pinecone Vector Store4",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7088,
+        -320
+      ],
+      "id": "d051abb3-73ae-4542-b6d7-ef93f675a630",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to get the current weather for any city or location. \nUse this whenever the user asks about weather, temperature, forecast, \nhumidity, or sky conditions. The input must be the city name, and \noptionally the country (e.g. \"Lahore, Pakistan\"). Returns real-time \nweather data including temperature, feels-like temperature, sky \nconditions, and humidity.",
+        "workflowId": {
+          "__rl": true,
+          "value": "YOUR_WEATHER_CHILD_WORKFLOW_ID",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        7536,
+        -544
+      ],
+      "id": "9364198f-a9b0-4cd2-b127-3eb3b3ba1e53",
+      "name": "Call 'Child Workflow for Weather'"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        6816,
+        -448
+      ],
+      "id": "d8f800d9-f5c7-4656-9a8f-8861a2309de4",
+      "name": "Wikipedia1"
+    },
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query__q_', ``, 'string') }}",
+        "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location__location_', ``, 'string') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        7376,
+        -464
+      ],
+      "id": "244bbf34-bd9c-46b9-bff2-4f42f0ac3ab6",
+      "name": "Google search in SerpApi",
+      "credentials": {
+        "serpApi": {
+          "name": "SerpApi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Customer Datastore (n8n training)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        []
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        []
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        []
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        []
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Welcome AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Terms and Condition AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Welcome AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Terms and Condition AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Terms and Condition AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        []
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Question and Answer Chain1",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain1": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question and Answer Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store3": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store4": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Child Workflow for Weather'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
