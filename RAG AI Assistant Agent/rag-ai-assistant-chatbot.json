@@ -1,0 +1,481 @@
+{
+  "name": "RAG  AI Assistant Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "n8n-practice folder"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -48
+      ],
+      "id": "b8b6242f-0452-4a1f-b6d0-3806164bb4d4",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "aa868e2f-30c1-4a67-a39a-18e7b1c1bb3f",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Start Workflow\n\nWhen a file is Uploaded inside the Google Drive",
+        "height": 368,
+        "width": 256,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -240
+      ],
+      "id": "de3d9142-6dba-4f44-97b0-96e9f7a4e4cc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Download File \n\nFile is Downloaded to be entered into the Vector Store",
+        "height": 368,
+        "width": 256,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -240
+      ],
+      "id": "ed35d968-6dc9-40b0-ab31-bac75b23b06b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-14recipes-project",
+          "mode": "list",
+          "cachedResultName": "n8n-14recipes-project"
+        },
+        "options": {
+          "pineconeNamespace": "14 recipes Ingredients + Methods"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "3d5ad6b9-d6d3-4070-a640-8ffbf20eea17",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Download File \n\nFile is Downloaded to be entered into the Vector Store",
+        "height": 368,
+        "width": 352,
+        "color": "#00052E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -240
+      ],
+      "id": "9ee3e118-a6f0-459e-afa1-68d54b83eb4e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Embedding Model ",
+        "height": 256,
+        "width": 256,
+        "color": "#00052E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        224
+      ],
+      "id": "d9f3d834-2b7e-4e73-880d-8d06103d49df",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# Data Loader",
+        "height": 256,
+        "width": 256,
+        "color": "#00052E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        256,
+        224
+      ],
+      "id": "991e8df5-4470-4782-933d-169507691b6f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        336
+      ],
+      "id": "e74e525a-4acf-43d3-8d22-4b6b905df0f0",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        336
+      ],
+      "id": "8be40923-f846-46dd-bc2b-07e6b337752f",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -464,
+        -832
+      ],
+      "id": "3c73a625-8e79-4953-b3f4-f006c7489c74",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "content": "#Chat Trigger\n\nChat with the AI Agent to get the information from the Vector Store",
+        "height": 368,
+        "width": 256,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -1008
+      ],
+      "id": "31ae5875-f7d5-410f-8b69-52d199c1d1b8",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Ai Agent",
+        "height": 368,
+        "width": 560,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -1008
+      ],
+      "id": "b803a168-855a-4d56-b147-b01703943513",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# Chat Model",
+        "height": 272,
+        "width": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -592
+      ],
+      "id": "11d72bcc-31fe-498d-a938-b8e57c8b6009",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# Memory",
+        "height": 224,
+        "width": 208,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -592
+      ],
+      "id": "87041c91-202e-4c2c-ae2a-78292386a758",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# Tools",
+        "height": 304,
+        "width": 512,
+        "color": "#00052E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -624
+      ],
+      "id": "5c9841d5-cb33-4752-93ce-93e11eeae47e",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful RAG  AI Assistant Chatbot Agent \n\n## Role\nYour job is to take the query asked by the user analyze it careful and answer back to the user using your Knowledge base that is the Vector store tool\n\n##Tool\nPinecone Vector Store Tool :\n1. Use this too to retrieve information about the recipes, Ingredients and methods on how to make the dish\n\n##Output Response\nOnly use the data retrieved from the Pinecone Vector store tool \nDon't use or make data from your own self  only use the data vector store data\n When the user query say recipe respond back with ingredients + methods\nWhen the user query say ingredients respond back with ingredients list only \nWhen the user query say methods respond back with  Methods list only \nStrictly Follow the Examples when giving the output to the user\n\n##Example:\nQuery 1 :  Tell me the recipe for making Chicken Biryani  \nAnswer :\n INGREDIENTS\n• 1 kg bone-in chicken pieces\n• 3 cups basmati rice, soaked 30 min\n• 2 large onions, thinly sliced\n• 1 cup plain yoghurt\n• 4 tbsp cooking oil / ghee\n• 2 tsp biryani masala\n• 1 tsp cumin seeds\n• 4 green cardamom pods\n• 2 bay leaves\n• 1 tsp turmeric powder\n• 1 tsp red chilli powder\n• Salt to taste\n• Fresh mint & coriander leaves\n• Pinch of saffron in 2 tbsp warm milk\n\nMETHOD\n1. Marinate chicken in yoghurt, biryani\nmasala, turmeric, chilli and salt for at least 1\nhour.\n2. Fry onions in oil/ghee until deep\ngolden-brown. Remove half and set aside for\ngarnish.\n3. In the same pot add cumin seeds,\ncardamom and bay leaves; sizzle 30\nseconds. Add marinated chicken and cook\non medium heat for 20 minutes until oil\nseparates.\n4. Parboil rice in salted boiling water for 8\nminutes — it should be 70 % cooked. Drain\nwell.\n5. Layer half the rice over the chicken.\nScatter mint, coriander and fried onions. Add\nremaining rice.\n6. Drizzle saffron milk over the top. Cover\ntightly with foil then lid. Cook on very low\nheat (dum) for 25 minutes.\n7. Rest 5 minutes, then gently mix before\nserving with raita.\n\nQuery 2 :  Tell me the ingredients for making Classic Hummus\nAnswer : INGREDIENTS\n• 400 g dried chickpeas, soaked overnight (or\n2 x 400 g tins, drained)\n• 1/2 tsp baking soda (if cooking dried)\n• 4 tbsp tahini\n• 3 garlic cloves\n• 4 tbsp fresh lemon juice\n• 3 tbsp extra-virgin olive oil, plus extra to\nserve\n• 1/2 tsp ground cumin\n• Salt to taste\n• Ice water as needed\n• Paprika and olive oil to serve\n• Fresh parsley, chopped \n\nQuery 3 : How would you prepare Classic Hummus \nAnswer :  METHOD\n1. If using dried chickpeas: drain soaked\nchickpeas, add fresh water and baking soda.\nBoil then simmer 60 minutes until very\ntender. Reserve cooking liquid.\n2. Blend garlic and lemon juice first, rest 10\nminutes (this mellows the garlic).\n3. Add tahini and blend until thick and pale.\nAdd olive oil and blend again.\n4. Add warm chickpeas (reserving a few for\ngarnish) and blend for 3 minutes until very\nsmooth.\n5. Add ice water, 1 tablespoon at a time, until\nhummus is light and creamy. Season with\ncumin and salt.\n6. Spread into a bowl, drizzle olive oil,\nsprinkle paprika and parsley. Top with\nreserved chickpeas. Serve with warm pita."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -48,
+        -832
+      ],
+      "id": "aa40240c-2f01-4653-8169-95be9f9795a3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -464
+      ],
+      "id": "f6e48ff9-32a4-43f9-b570-584cccc42e58",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to retrieve data about the recipes inside the vector store",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-14recipes-project",
+          "mode": "list",
+          "cachedResultName": "n8n-14recipes-project"
+        },
+        "topK": 8,
+        "options": {
+          "pineconeNamespace": "14 recipes Ingredients + Methods"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        -512
+      ],
+      "id": "6a79fe14-b7b9-4718-b2ec-d8ec5602a2fe",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        -480
+      ],
+      "id": "5943a665-e697-471d-a873-74a16d770f67",
+      "name": "Simple Memory"
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

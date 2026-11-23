@@ -1,0 +1,28 @@
+# =============================================================================
+# .env.example  -  copy to `.env` and fill in your own values.
+# `.env` is git-ignored. NEVER commit real keys.
+#
+# NOTE: n8n does not read these automatically into node credentials.
+# Use them as a reference when creating credentials in the n8n UI
+# (Credentials -> Create), or as environment variables for your n8n instance.
+# =============================================================================
+
+# --- n8n instance (self-hosted only) -----------------------------------------
+N8N_ENCRYPTION_KEY=
+
+# --- OpenAI (embeddings, text-embedding model with 1536 dimensions) ----------
+OPENAI_API_KEY=
+
+# --- OpenRouter (chat model: nvidia/nemotron-3-super-120b-a12b) --------------
+OPENROUTER_API_KEY=
+
+# --- Pinecone (vector store) --------------------------------------------------
+PINECONE_API_KEY=
+PINECONE_INDEX_NAME=n8n-14recipes-project
+PINECONE_NAMESPACE=14 recipes Ingredients + Methods
+
+# --- Google Drive OAuth2 (trigger + download) --------------------------------
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# ID of the Drive folder the trigger watches for new files
+GOOGLE_DRIVE_FOLDER_ID=
