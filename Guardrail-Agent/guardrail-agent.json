@@ -1,0 +1,147 @@
+{
+  "name": "Guardrail agent",
+  "nodes": [
+    {
+      "parameters": {
+        "text": "={{ $json.chatInput }}",
+        "guardrails": {
+          "keywords": "=sex, sexy, sexual, sexuality, nude, naked, nudity, \nporn, pornography, xxx, adult, horny, aroused, \narousal, erotic, erotica, orgasm, climax, pleasure, \npleasured, squirt, squirting, cum, cumshot, ejaculate, \nejaculation, masturbate, masturbation, intercourse, \npenetration, foreplay, blowjob, handjob, rimjob, \nthreesome, orgy, fetish, kink, kinky, bdsm, \nstrip, stripper, striptease, lingerie, thong, \npenis, vagina, dick, cock, pussy, boobs, breasts, \nnipple, nipples, ass, butt, buttocks, clitoris, \ngenitals, genitalia, erection, boner, hard on, \nslutty, slut, whore, hooker, prostitute, escort, \nonlyfans, camgirl, webcam sex, sexting, nudes, \nsend nudes, make love, turn me on, get me off, \nfinger me, fuck, fucking, fucked, fucker, \nshit, bitch, bastard, rape, molest, grope, \nundress, undressing, touch me, sleep with me, \nlick me, suck me, ride me, bang me\nstrip club, adult content, ass fuck, adult video, talk dirty to me, sexual satisfaction"
+        },
+        "customizeSystemMessage": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        208,
+        16
+      ],
+      "id": "e2653bb3-e56e-4a55-813d-a8221faa12d4",
+      "name": "Guardrails"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        16
+      ],
+      "id": "66b42c08-3184-4111-8cf3-cbfe332a1513",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        368,
+        352
+      ],
+      "id": "ca66e5f3-bf8f-4b6e-b4c5-0886d64d0f63",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.guardrailsInput }}",
+        "options": {
+          "systemMessage": "You are a helpful and friendly AI assistant. \nThe user's message has been reviewed and cleared — \nit contains no policy violations, harmful content, \nor inappropriate language.\n\nYour job:\n- Answer the user's question clearly and helpfully\n- Keep your tone friendly, professional, and concise\n- Stay on topic — only respond to what the user asked\n- If you don't know something, say so honestly — \n  do not make up information\n- Never produce harmful, offensive, or inappropriate \n  content in your response, even if the user's \n  message seems harmless\n\nYou are the approved response layer. \nTreat every message you receive here as safe \nand respond with full effort and accuracy."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        -160
+      ],
+      "id": "48d5f1e7-9197-440b-8ac2-2d50283be74b",
+      "name": "Approved Content Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.guardrailsInput }}",
+        "options": {
+          "systemMessage": "You are a policy enforcement assistant. \nThe user's message has been flagged and blocked \nbecause it contains inappropriate or prohibited content.\n\nYour job:\n- Do NOT answer the user's original question\n- Do NOT repeat or reference the flagged words or content\n- Politely inform the user that their message \n  was not allowed\n- Keep your response short, calm, and professional\n- Do not be rude or lecture the user\n\nUse this exact response every time:\n\n\"I'm sorry, but your message contains content that \ngoes against our usage policy and cannot be processed. \nPlease rephrase your question in a respectful and \nappropriate way, and I will be happy to help you.\"\n\nDo not add anything else. Do not explain which words \nwere flagged. Do not engage with the topic further."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        96
+      ],
+      "id": "aaffce14-e552-4a3f-bca5-b4e3d4b3c7c7",
+      "name": "Disapproved Content Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails": {
+      "main": [
+        [
+          {
+            "node": "Approved Content Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Disapproved Content Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Approved Content Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Disapproved Content Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
