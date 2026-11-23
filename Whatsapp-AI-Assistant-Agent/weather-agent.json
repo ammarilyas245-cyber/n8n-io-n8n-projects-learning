@@ -1,0 +1,248 @@
+{
+  "name": "Child Workflow for Weather",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough",
+        "returnOutput": "allRuns"
+      },
+      "id": "711e8465-8214-46d9-98ce-70ba899c5e98",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "123d996c-4a66-4c1e-9b09-314a13fb3b6a",
+              "name": "city",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        0
+      ],
+      "id": "eb8507dc-b3a3-4ee6-8e5d-402f14cd6f17",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "cityName": "={{ $json.city }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "eac08fec-932a-4639-8d62-a9eda2762043",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "2tq0D27vwIstqB9C",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=i am giving you open weather api result which are the deatils of the weather of any city, kindly use that information and give me the plain simple english description of the weather:\nMain:{{ $json.weather[0].main }}\nDescription:{{ $json.weather[0].description }}\nTemp:{{ $json.main.temp }}\nFeel Like:{{ $json.main.feels_like }}\nHumidity:{{ $json.main.humidity }}\nCountry:{{ $json.sys.country }}\nCity:{{ $json.name }}"
+            },
+            {
+              "role": "system",
+              "content": "you are a weather assistant agent who's responsibility is to get the information provided by the user in the \"User Message\" and give a funny response back to the user.\nUse emojis to make the text more descriptive and enjoyable to read\n \nConvert the provided raw metrics into a friendly conversational update. Use WhatsApp formatting styles (*bold* for emphasis) and emojis. Do not wrap your response in JSON, code brackets, arrays, or quotes. Output plain text only."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "99b23935-d050-4f7d-b5bb-50f6e869b9c9",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "b1uuahNwy3IlC85U",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6fec86a1-821c-4116-b569-c039ae7fbca3",
+              "name": "Response",
+              "value": "={{ $json.output[0].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "03bac010-02d7-4f03-aa1b-240137e91b8e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to extract raw weather data metrics from the input data object, including temperature, feels like temperature, weather description, and humidity. It returns a clean string containing these essential metrics.",
+        "jsCode": "// Access the input data objects provided to the tool node\nconst weatherData = $('OpenWeatherMap').item.json;\n\nconst temp = weatherData.main.temp;\nconst feelsLike = weatherData.main.feels_like;\nconst description = weatherData.weather[0].description;\nconst humidity = weatherData.main.humidity;\n\n// Returns a clean structured text format for the AI model to interpret\nreturn `Current Weather conditions: ${description}. Temperature: ${temp}°C. Feels like: ${feelsLike}°C. Humidity: ${humidity}%.`;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        256
+      ],
+      "id": "a4230eaf-b84b-4b65-8b80-c60ad83387d1",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nfor (const item of items) {\n  const query = item.json.city || '';\n  \n  let city = query\n    // Remove common filler words/phrases\n    .replace(/current weather/gi, '')\n    .replace(/weather (in|for|at)?/gi, '')\n    .replace(/(today|tomorrow|now|forecast|please)/gi, '')\n    .replace(/[^a-zA-Z\\s]/g, '') // strip punctuation/numbers\n    .trim();\n  \n  item.json.city = city;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        0
+      ],
+      "id": "ac1e7b10-9c14-45c5-a77f-8acdec7c1fb7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "# Weather Agent (sub-workflow)\n## Start (passthrough trigger)\n\nReceives { query }, e.g. \"current weather Karachi today\".\n\n## Edit Fields (Set node)\n\nCopies query straight into a city field, no cleaning yet.\n\n## Code in JavaScript\n\nRegex-strips filler words/phrases from city: \"current weather\", \"weather in/for/at\", \"today/tomorrow/now/forecast/please\", and any non-letter characters.\n⚠️ Fragile — unusual phrasing not covered by these patterns can leave garbage in city, causing a silent OpenWeatherMap lookup failure.\n\n## OpenWeatherMap\n\nLooks up current conditions by the cleaned cityName.\nReturns raw metrics: weather[0].main/description, main.temp/feels_like/humidity, sys.country, name.\n\n## Message a model (OpenAI, GPT-4.1)\n\nTwo static messages: a user-role message embedding the raw weather fields, and a system-role message instructing a funny, emoji-rich, WhatsApp-formatted (*bold*, no headers) rewrite.\nHas Code Tool available as an ai_tool if it needs to re-extract clean metrics mid-generation.\n\n## Code Tool (Code-based LangChain tool)\n\nPulls $('OpenWeatherMap').item.json and returns a single clean sentence string (description/temp/feels-like/humidity) for the model to reference.\n\n## Edit Fields1 (Set node)\n\nExtracts output[0].content[0].text from the model response into the final Response field returned to the parent.\n",
+        "height": 1120,
+        "width": 688,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -16
+      ],
+      "id": "cef45283-1004-4c93-a74d-11d9b1ac87cd",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "05f08eb3-077d-4e94-ad90-9204f7cf4ca7",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "Mr8B2qQpZwW56lTT",
+  "tags": []
+}
